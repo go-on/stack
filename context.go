@@ -94,15 +94,18 @@ func (c *context) Transaction(fn func(Contexter)) {
 	fn(&contextTransaction{c})
 }
 
-func (c context) ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler) {
-	_, has := wr.(Contexter)
-	if has {
-		next.ServeHTTP(wr, req)
-		return
-	}
-	ctx := &context{wr, map[interface{}]Swapper{}, &sync.RWMutex{}}
-	ctx.Set(&ResponseWriter{wr})
-	next.ServeHTTP(ctx, req)
+// Context calls the next http.Handlers ServeHTTP method
+// with a ResponseWriter that implements the Contexter interface.
+// If the ResponseWriter already implements the Contexter interface, it is simply passed through.
+func Context(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
+		_, has := wr.(Contexter)
+		if has {
+			next.ServeHTTP(wr, req)
+			return
+		}
+		ctx := &context{wr, map[interface{}]Swapper{}, &sync.RWMutex{}}
+		ctx.Set(&ResponseWriter{wr})
+		next.ServeHTTP(ctx, req)
+	})
 }
-
-var Context = mwHandler(context{})
