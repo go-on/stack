@@ -53,6 +53,9 @@ Accepted middleware
   Martini
   Negroni
 
+Batteries included
+
+Middleware can be found in the sub package stack/responsewriter.
 
 Usage
 
@@ -180,29 +183,6 @@ Other ResponseWriters
 The package stack.responsewriter provides some ResponseWriter wrappers that help with development of middleware
 and also support context sharing via embedding of a stack.Contexter if it is available.
 
-These are Buffer, Peek and EscapeHTML.
-
-Buffer is a simple buffer. A middleware may pass it to the next handlers ServeHTTP method as a
-drop in replacement for the response writer. After the ServeHTTP method is run the middleware may
-examine what has been written to the Buffer and decide what to write to the "original" ResponseWriter
-(that may well be another buffer passed from another middleware).
-
-The downside is the body being written two times and the complete caching of the
-body in the memory which will be inacceptable for large bodies.
-
-Therefor Peek is an alternative response writer wrapper that only caching headers and status code
-but allowing to intercept calls of the Write method. All middleware without the need to read
-the whole response body should use Peek or provide their own ResponseWriter wrapper (then do not
-forget to implement the Contexter interface).
-
-Finally EscapeHTML provides a response writer wrapper that allows on the fly
-html escaping of the bytes written to the wrapped response writer.
-
-Credits
-
-Initial inspiration came from Christian Neukirchen's
-rack for ruby some years ago.
-
 FAQ
 
 1. A ResponseWriter is an interface, because it may implement other interfaces from the http libary,
@@ -228,6 +208,11 @@ included.
 All response writer wrappers of this package embed the stack.Contexter which is type asserted from the
 ResponseWriter and implement the stack.Contexter interface that way. This is the recommended way for
 own wrapping ResponseWriters.
+
+Credits
+
+Initial inspiration came from Christian Neukirchen's
+rack for ruby some years ago.
 
 */
 package stack

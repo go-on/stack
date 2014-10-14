@@ -8,6 +8,16 @@ import (
 )
 
 // Buffer is a ResponseWriter wrapper that may be used as buffer.
+//
+// A middleware may pass it to the next handlers ServeHTTP method as a
+// drop in replacement for the response writer. After the ServeHTTP method is run the middleware may
+// examine what has been written to the Buffer and decide what to write to the "original" ResponseWriter
+// (that may well be another buffer passed from another middleware).
+//
+// The downside is the body being written two times and the complete caching of the
+// body in the memory which will be inacceptable for large bodies.
+// Therefor Peek is an alternative response writer wrapper that only caching headers and status code
+// but allowing to intercept calls of the Write method.
 type Buffer struct {
 
 	// ResponseWriter is the underlying response writer that is wrapped by Buffer
