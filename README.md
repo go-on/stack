@@ -196,33 +196,36 @@ and also support context sharing via embedding of a stack.Contexter if it is ava
 
 ## FAQ
 
-1. A ResponseWriter is an interface, because it may implement other interfaces from the http libary,
+### Q
+
+A ResponseWriter is an interface, because it may implement other interfaces from the http libary,
 e.g. http.Flusher. If it is wrapped that underlying implementation is not accessible anymore
 
-Answer: Since only one Contexter may be used within a stack, it is always possible to ask the
-Contexter for the underlying ResponseWriter. This is what helper functions like
-ReclaimResponseWriter(), Flush(), CloseNotify() and Hijack() do.
+### A
 
-2. Why is the recommended way to use the Contexter interface to make a type assertion from
-the ResponseWriter to the Contexter interface without error handling?
+Since only one Contexter may be used within a stack, it is always possible to ask the Contexter for the underlying ResponseWriter. This is what helper functions like ReclaimResponseWriter(), Flush(), CloseNotify() and Hijack() do.
 
-Answer: Middleware stacks should be created before the server is handling requests and then not change
-anymore. And you should run tests. Then the assertion will blow up and that is correct because
-there is no reasonable way to handle such an error. It means that you have no stack.Context in your
-stack which is easy to fix.
+### Q
 
-3. What happens if my context is wrapped inside another context or response writer?
+Why is the recommended way to use the Contexter interface to make a type assertion from the ResponseWriter to the Contexter interface without error handling?
 
-Answer: stack.Context makes sure that only one context exists within a stack no matter how often it is
-included.
+### A
 
-All response writer wrappers of this package embed the stack.Contexter which is type asserted from the
-ResponseWriter and implement the stack.Contexter interface that way. This is the recommended way for
-own wrapping ResponseWriters.
+Middleware stacks should be created before the server is handling requests and then not change anymore. And you should run tests. Then the assertion will blow up and that is correct because there is no reasonable way to handle such an error. It means that you have no stack.Context in your stack which is easy to fix.
+
+### Q
+
+What happens if my context is wrapped inside another context or response writer?
+
+### A
+
+stack.Context makes sure that only one context exists within a stack no matter how often it is included.
+
+All response writer wrappers of this package embed the stack.Contexter which is type asserted from the ResponseWriter and implement the stack.Contexter interface that way. This is the recommended way for own wrapping ResponseWriters.
 
 ## Credits
 
 Initial inspiration came from Christian Neukirchen's
 rack for ruby some years ago.
 
-Adapters come from [carbocation](https://github.com/carbocation/interpose/blob/master/adaptors)
+Adapters come from [carbocation/interpose](https://github.com/carbocation/interpose/blob/master/adaptors)

@@ -215,6 +215,6 @@ Credits
 Initial inspiration came from Christian Neukirchen's
 rack for ruby some years ago.
 
-Adapters come from carbocation (https://github.com/carbocation/interpose/blob/master/adaptors)
+Adapters come from carbocation/interpose (https://github.com/carbocation/interpose/blob/master/adaptors)
 */
 package stack
