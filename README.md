@@ -18,9 +18,8 @@ Package stack creates a fast and flexible middleware stack for http.Handlers.
 
 ## Benchmarks (Go 1.3)
 
-  // The overhead of n writes to http.ResponseWriter via n wrappers
-  // vs n writes in a loop within a single http.Handler
-  //
+The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a loop within a single http.Handler
+
   BenchmarkServing2Simple    2000000         847 ns/op 1.00x
   BenchmarkServing2Wrappers  2000000         899 ns/op 1.06x
 
@@ -220,3 +219,5 @@ own wrapping ResponseWriters.
 
 Initial inspiration came from Christian Neukirchen's
 rack for ruby some years ago.
+
+Adapters come from [carbocation](https://github.com/carbocation/interpose/blob/master/adaptors)
