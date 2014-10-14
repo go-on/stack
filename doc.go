@@ -33,11 +33,6 @@ Benchmarks (Go 1.3)
   BenchmarkServing50Wrappers  100000       21591 ns/op 1.06x
 
 
-Credits
-
-Initial inspiration came from Christian Neukirchen's
-rack for ruby some years ago.
-
 Accepted middleware
 
   // Functions
@@ -57,6 +52,7 @@ Accepted middleware
   // 3rd party middleware (via stack/adapter)
   Martini
   Negroni
+
 
 Usage
 
@@ -192,6 +188,11 @@ forget to implement the Contexter interface).
 
 Finally EscapeHTML provides a response writer wrapper that allows on the fly
 html escaping of the bytes written to the wrapped response writer.
+
+Credits
+
+Initial inspiration came from Christian Neukirchen's
+rack for ruby some years ago.
 
 FAQ
 
