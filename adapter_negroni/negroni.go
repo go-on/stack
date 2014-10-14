@@ -22,9 +22,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Package adapternegroni is a copy of https://github.com/carbocation/interpose/blob/master/adaptors/negroni.go
-
-package adapternegroni
+/*
+Package adapter_negroni is an adapter for negroni middleware to be used with github.com/go-on/stack.
+It is a copy of https://github.com/carbocation/interpose/blob/master/adaptors/negroni.go
+*/
+package adapter_negroni
 
 import (
 	"net/http"
