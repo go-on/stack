@@ -149,9 +149,10 @@ that can have even more detailed information if the middleware is a fmt.Stringer
 
 see example_debug_test.go for an example
 
-Underlying ResponseWriters
+Original ResponseWriter
 
-To get access to the underlying ResponseWriter there are several methods:
+To get access to the original ResponseWriter there are several methods. Here is an example
+of using the original ResponseWriter to type assert it to a http.Flusher.
 
   // access the original http.ResponseWriter to flush
   func flush(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
