@@ -139,6 +139,15 @@ stack.Context is used.
     // value: some value
   }
 
+Debugging
+
+A Stack tracks the File and Line of its definition and saves middleware strings
+that can have even more detailed information if the middleware is a fmt.Stringer.
+
+see example_debug_test.go for an example
+
+Underlying ResponseWriters
+
 To get access to the underlying ResponseWriter there are several methods:
 
   // access the original http.ResponseWriter to flush
@@ -159,7 +168,7 @@ To get access to the underlying ResponseWriter there are several methods:
   }
 
 
-Shortcuts for underlying ResponseWriters
+  // shortcuts for underlying ResponseWriters
 
   Flush                 // flush a ResponseWriter if it is a http.Flusher
   CloseNotify           // returns a channel to notify if ResponseWriter is a http.CloseNotifier

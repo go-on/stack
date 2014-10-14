@@ -33,10 +33,6 @@ type Swapper interface {
 	Swap(replacement interface{})
 }
 
-type stringer interface {
-	String() string
-}
-
 /*
 	Accepted middlewares
 
@@ -86,7 +82,7 @@ func New(middlewares ...interface{}) *Stack {
 
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		var debugInfo string
-		if insp, ok := middlewares[i].(stringer); ok {
+		if insp, ok := middlewares[i].(fmt.Stringer); ok {
 			debugInfo = fmt.Sprintf("%T = %s", middlewares[i], insp.String())
 		} else {
 			debugInfo = fmt.Sprintf("%T = %#v", middlewares[i], middlewares[i])
