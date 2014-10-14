@@ -20,9 +20,9 @@ Features
 
 Benchmarks (Go 1.3)
 
-	// The overhead of n writes to http.ResponseWriter via n wrappers
-	// vs n writes in a loop within a single http.Handler
-
+  // The overhead of n writes to http.ResponseWriter via n wrappers
+  // vs n writes in a loop within a single http.Handler
+  //
   BenchmarkServing2Simple    2000000         847 ns/op 1.00x
   BenchmarkServing2Wrappers  2000000         899 ns/op 1.06x
 
@@ -40,7 +40,6 @@ Initial inspiration came from Christian Neukirchen's rack for ruby some years ag
 Accepted middleware
 
   // Functions
-
   func(next http.Handler) http.Handler
   func(http.ResponseWriter, *http.Request)
   func(http.ResponseWriter, *http.Request, next http.Handler)
@@ -48,7 +47,6 @@ Accepted middleware
   func(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler)
 
   // Interfaces
-
   ServeHTTP(http.ResponseWriter,*http.Request)                                      // http.Handler
   Wrap(http.Handler) http.Handler                                                   // stack.Wrapper
   ServeHTTP(http.ResponseWriter, *http.Request, next http.Handler)                  // stack.Middleware
@@ -56,7 +54,6 @@ Accepted middleware
   ServeHTTP(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler) // stack.ContextMiddleware
 
   // 3rd party middleware (via stack/adapter)
-
   Martini
   Negroni
 
@@ -85,7 +82,7 @@ a stack.Contexter.
   }
 
 
-Alternatively middlware might fullfil the stack.ContextHandler or stack.ContextMiddleware interface
+Alternatively middlware might implement the stack.ContextHandler or stack.ContextMiddleware interface
 or have the corresponding function signatures.
 
   func(stack.Contexter, http.ResponseWriter, *http.Request){}
@@ -116,11 +113,11 @@ must implement the Swapper interface.
 
   func writeVal(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
     var val MyVal
-    found := ctx.Get(&val)
-    if !found {
-      fmt.Println("no value found")
-    } else {
+
+    if found := ctx.Get(&val); found {
       fmt.Printf("value: %s\n", string(val))
+    } else {
+      fmt.Println("no value found")
     }
     next.ServeHTTP(rw, req)
   }
@@ -135,7 +132,6 @@ stack.Context is used.
       writeVal,
       &MyMiddleware{},
       writeVal,
-      flush,
     )
 
     r, _ := http.NewRequest("GET", "/", nil)
@@ -168,9 +164,9 @@ To get access to the underlying ResponseWriter there are several methods:
 
 Shortcuts for underlying ResponseWriters
 
-  Flush // flush a ResponseWriter if it is a http.Flusher
-  CloseNotify // returns a channel to notify if ResponseWriter is a http.CloseNotifier
-  Hijack    // allows to hijack a connection if ResponseWriter is a http.Hijacker
+  Flush                 // flush a ResponseWriter if it is a http.Flusher
+  CloseNotify           // returns a channel to notify if ResponseWriter is a http.CloseNotifier
+  Hijack                // allows to hijack a connection if ResponseWriter is a http.Hijacker
   ReclaimResponseWriter // get the original ResponseWriter from a ResponseWriter with context
 
 Other ResponseWriters
@@ -213,7 +209,7 @@ anymore. And you should run tests. Then the assertion will blow up and that is c
 there is no reasonable way to handle such an error. It means that you have no stack.Context in your
 stack which is easy to fix.
 
-4. What happens if my context is wrapped inside another context or response writer?
+3. What happens if my context is wrapped inside another context or response writer?
 
 Answer: stack.Context makes sure that only one context exists within a stack no matter how often it is
 included.
