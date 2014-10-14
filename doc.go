@@ -169,7 +169,7 @@ Shortcuts for underlying ResponseWriters
 Other ResponseWriters
 
 The package stack.responsewriter provides some ResponseWriter wrappers that help with development of middleware
-and also support context sharing via implementation of the Contexter interface.
+and also support context sharing via embedding of a stack.Contexter if it is available.
 
 These are Buffer, Peek and EscapeHTML.
 
