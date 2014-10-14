@@ -35,7 +35,8 @@ Benchmarks (Go 1.3)
 
 Credits
 
-Initial inspiration came from Christian Neukirchen's rack for ruby some years ago.
+Initial inspiration came from Christian Neukirchen's
+rack for ruby some years ago.
 
 Accepted middleware
 
