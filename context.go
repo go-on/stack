@@ -8,7 +8,8 @@ import (
 	"sync"
 )
 
-// Only one value per type can be stored inside a contexter
+// Contexter stores and retrieves per request data.
+// Only one value per type can be stored.
 type Contexter interface {
 
 	// Set the given Swapper, replaces the value of the same type
@@ -16,19 +17,39 @@ type Contexter interface {
 	Set(Swapper)
 
 	// Get a given Swapper. If there is a Swapper of this type
-	// inside the Contexter, the given Swappers Swap called and given the stored Swapper and true is returned.
+	// inside the Contexter, the given Swappers Swap method is called with the stored value and true is returned.
 	// If no Swapper of the same type could be found, false is returned
 	// Get may be run on the same Contexter concurrently
 	Get(Swapper) (has bool)
 
-	// Del deletes a value of the given type
+	// Del deletes a value of the given type.
 	// Del may be run on the same Contexter concurrently
 	Del(Swapper)
 
-	// Transaction runs the given function inside a transaction. A new contexter is passed to the
+	// Transaction runs the given function inside a transaction. A TransactionContexter is passed to the
 	// given function that might be used to call the Set, Get and Del methods inside the transaction.
-	// However that Contexers methods must not be used concurrently
-	Transaction(func(Contexter))
+	// However that methods must not be used concurrently
+	Transaction(func(TransactionContexter))
+}
+
+// TransactionContexter stores and retrieves per request data via a hidden Contexter.
+// It is meant to be used in the Transaction method of a Contexter.
+// Only one TransactionContexter might be used at the same time for the same Contexter.
+// No method of a TransactionContexter might be used concurrently
+type TransactionContexter interface {
+	// Set the given Swapper, replaces the value of the same type
+	// Set may NOT be run on the same TransactionContexter concurrently
+	Set(Swapper)
+
+	// Get a given Swapper. If there is a Swapper of this type
+	// inside the Contexter, the given Swappers Swap method is called with the stored value and true is returned.
+	// If no Swapper of the same type could be found, false is returned
+	// Get may NOT be run on the same TransactionContexter concurrently
+	Get(Swapper) (has bool)
+
+	// Del deletes a value of the given type.
+	// Del may NOT be run on the same TransactionContexter concurrently
+	Del(Swapper)
 }
 
 type contextTransaction struct {
@@ -54,10 +75,6 @@ func (c *contextTransaction) Get(target Swapper) bool {
 
 var _ Contexter = &contextTransaction{}
 var _ Contexter = &context{}
-
-func (c *contextTransaction) Transaction(fn func(Contexter)) {
-	panic("nested transactions are not allowed")
-}
 
 type context struct {
 	http.ResponseWriter // you always need this
@@ -88,7 +105,7 @@ func (c *context) Get(target Swapper) bool {
 	return true
 }
 
-func (c *context) Transaction(fn func(Contexter)) {
+func (c *context) Transaction(fn func(TransactionContexter)) {
 	c.Lock()
 	defer c.Unlock()
 	fn(&contextTransaction{c})
