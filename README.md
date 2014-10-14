@@ -20,6 +20,7 @@ Package stack creates a fast and flexible middleware stack for http.Handlers.
 
 The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a loop within a single http.Handler
 
+```
   BenchmarkServing2Simple    2000000         847 ns/op 1.00x
   BenchmarkServing2Wrappers  2000000         899 ns/op 1.06x
 
@@ -28,10 +29,11 @@ The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a 
 
   BenchmarkServing50Simple    100000       20354 ns/op 1.00x
   BenchmarkServing50Wrappers  100000       21591 ns/op 1.06x
-
+```
 
 ## Accepted middleware
 
+```
   // Functions
   func(next http.Handler) http.Handler
   func(http.ResponseWriter, *http.Request)
@@ -49,6 +51,7 @@ The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a 
   // 3rd party middleware (via stack/adapter)
   Martini
   Negroni
+```
 
 ## Batteries included
 
@@ -86,12 +89,13 @@ a stack.Contexter.
 Alternatively middlware might implement the stack.ContextHandler or stack.ContextMiddleware interface
 or have the corresponding function signatures.
 
+```
   func(stack.Contexter, http.ResponseWriter, *http.Request){}
   func(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler){}
 
   func (...) ServeHTTP(stack.Contexter, http.ResponseWriter, *http.Request){}
   func (...) ServeHTTP(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler)
-
+```
 
 To share per request context between middlewares, define a type for your data.
 For each type only one value can be stored. The pointer of the type is stored and must implement the Swapper interface.
@@ -176,13 +180,14 @@ of using the original ResponseWriter to type assert it to a http.Flusher.
     // stack.Flush(rw)
   }
 ```
-
+```
   // shortcuts for underlying ResponseWriters
 
   Flush                 // flush a ResponseWriter if it is a http.Flusher
   CloseNotify           // returns a channel to notify if ResponseWriter is a http.CloseNotifier
   Hijack                // allows to hijack a connection if ResponseWriter is a http.Hijacker
   ReclaimResponseWriter // get the original ResponseWriter from a ResponseWriter with context
+```
 
 ## Other ResponseWriters
 
