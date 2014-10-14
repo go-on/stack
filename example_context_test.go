@@ -33,7 +33,7 @@ func writeVal(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, ne
 	next.ServeHTTP(rw, req)
 }
 
-func ExampleContextNew() {
+func ExampleContext() {
 	rack := stack.New(
 		stack.Context,
 		writeVal,
