@@ -50,7 +50,7 @@ func (w writeString) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(wr, string(w))
 }
 
-func (w writeString) ServeHTTPNext(next http.Handler, wr http.ResponseWriter, req *http.Request) {
+func (w writeString) ServeHTTPNext(wr http.ResponseWriter, req *http.Request, next http.Handler) {
 	w.ServeHTTP(wr, req)
 	next.ServeHTTP(wr, req)
 }
@@ -71,7 +71,7 @@ func (w write) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	fmt.Fprint(wr, string(w))
 }
 
-func (w write) ServeHTTPNext(next http.Handler, wr http.ResponseWriter, req *http.Request) {
+func (w write) ServeHTTPNext(wr http.ResponseWriter, req *http.Request, next http.Handler) {
 	w.ServeHTTP(wr, req)
 	next.ServeHTTP(wr, req)
 }
@@ -97,4 +97,15 @@ func (w writeStop) Wrap(next http.Handler) http.Handler {
 		w.ServeHTTP(wr, req)
 	}
 	return f
+}
+
+type writeDebug string
+
+func (w writeDebug) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
+	wr.Header().Set("Content-Type", "text/plain")
+	fmt.Fprint(wr, string(w))
+}
+
+func (w writeDebug) String() string {
+	return fmt.Sprintf(`<writeDebug %#v>`, string(w))
 }
