@@ -176,19 +176,19 @@ func mwCtxHandler(h interface {
 
 	The following functions are converted:
 
-	func(http.Handler) http.Handler
-	func(wr http.ResponseWriter, req *http.Request)
-	func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	func(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
+	    func(http.Handler) http.Handler
+	    func(wr http.ResponseWriter, req *http.Request)
+	    func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
+	    func(wr http.ResponseWriter, req *http.Request, next http.Handler)
+	    func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
 
 	The following interfaces are converted:
 
-	Wrap(http.Handler) http.Handler
-	ServeHTTP(wr http.ResponseWriter, req *http.Request)
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
+	    Wrap(http.Handler) http.Handler
+	    ServeHTTP(wr http.ResponseWriter, req *http.Request)
+	    ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
+	    ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
+	    ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
 */
 func Handler(i interface{}) (h http.Handler) {
 	switch x := i.(type) {
