@@ -5,32 +5,17 @@ package middleware
 import (
 	"encoding/json"
 
-	"github.com/go-on/stack"
-
 	"net/http"
 )
 
-func WriteJSON(ctx stack.Contexter, rw http.ResponseWriter, obj interface{}) {
-	b, err := json.Marshal(obj)
-
-	if err != nil {
-		SetError(err, ctx)
-		rw.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
-	rw.Header().Set("Content-Type", "application/json; charset=utf-8")
-	rw.Write(b)
+// JSONResponse mashals the given obj to the given http.ResponseWriter
+func JSONResponse(obj interface{}, w http.ResponseWriter) (err error) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	return json.NewEncoder(w).Encode(obj)
 }
 
-type json_ struct {
-	obj interface{}
-}
-
-func (j *json_) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request) {
-	WriteJSON(ctx, rw, j.obj)
-}
-
-func JSON(obj interface{}) *json_ {
-	return &json_{obj}
+// JSONRequest unmarshals the http.Request body to the object of the pointer ptr
+func JSONRequest(ptr interface{}, r *http.Request) (err error) {
+	defer r.Body.Close()
+	return json.NewDecoder(r.Body).Decode(ptr)
 }
