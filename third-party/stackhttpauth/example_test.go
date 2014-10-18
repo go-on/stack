@@ -27,9 +27,7 @@ func secretDigest(user, realm string) string {
 	return ""
 }
 
-type app struct{}
-
-func (a app) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
+func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
 	var authReq stackhttpauth.AuthenticatedRequest
 	ctx.Get(&authReq)
 	rw.Write([]byte("user " + authReq.Username + " authenticated"))
@@ -42,7 +40,7 @@ func ExampleBasic() {
 	stackBasic := stack.New(
 		stack.Context,
 		stackhttpauth.Basic("example.com", secretBasic),
-		app{},
+		app,
 	)
 
 	rec := httptest.NewRecorder()
@@ -73,7 +71,7 @@ func ExampleDigest() {
 	stackDigest := stack.New(
 		stack.Context,
 		stackhttpauth.Digest("example.com", secretDigest),
-		app{},
+		app,
 	)
 
 	rec := httptest.NewRecorder()

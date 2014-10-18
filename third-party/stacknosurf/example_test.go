@@ -11,10 +11,8 @@ import (
 	"github.com/go-on/stack/third-party/stacknosurf"
 )
 
-type app struct{}
-
-// ServeHTTP serves the form value "a" for POST requests and otherwise the token
-func (app) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
+// app serves the form value "a" for POST requests and otherwise the token
+func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
 	if req.Method == "POST" {
 		req.ParseForm()
 		rw.Write([]byte(req.FormValue("a")))
@@ -32,7 +30,7 @@ func Example() {
 		stack.Context,
 		&stacknosurf.CheckToken{},
 		stacknosurf.SetToken{},
-		app{},
+		app,
 	)
 
 	// here comes the tests
