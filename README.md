@@ -51,6 +51,11 @@ The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a 
   // 3rd party middleware (via stack/adapter)
   Martini
   Negroni
+
+  // 3rd party integrations
+  abbot/go-http-auth (Basic and Digest Authentication)
+  justinas/nosurf (CSRF protection)
+  gorilla/sessions
 ```
 
 ## Batteries included
