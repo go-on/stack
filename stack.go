@@ -238,3 +238,13 @@ func (e end) ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Hand
 func (e end) middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(e)
 }
+
+func Handlers(i ...interface{}) (h []http.Handler) {
+	h = make([]http.Handler, len(i))
+
+	for n, ii := range i {
+		h[n] = Handler(ii)
+	}
+
+	return h
+}

@@ -53,9 +53,15 @@ Accepted middleware
   Martini
   Negroni
 
+  // 3rd party integrations
+  abbot/go-http-auth (Basic and Digest Authentication)
+  justinas/nosurf (CSRF protection)
+  gorilla/sessions
+
+
 Batteries included
 
-Middleware can be found in the sub package stack/responsewriter.
+Middleware can be found in the sub package stack/middleware.
 
 Usage
 
