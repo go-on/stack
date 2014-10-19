@@ -43,8 +43,8 @@ func TestStackDebug(t *testing.T) {
 	)
 
 	file := filepath.Join(gopath, "src", "github.com", "go-on", "stack", "stack_test.go")
-	if s.File != file {
-		t.Errorf("s.File = %#v // expected %#v", s.File, file)
+	if filepath.FromSlash(s.File) != file {
+		t.Errorf("s.File = %#v // expected %#v", filepath.FromSlash(s.File), file)
 	}
 
 	line := 43
