@@ -2,6 +2,7 @@ package stack
 
 import (
 	"fmt"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -78,7 +79,10 @@ func New(middlewares ...interface{}) *Stack {
 	var h http.Handler = http.HandlerFunc(noOp)
 	s := &Stack{}
 	s.Middleware = make([]string, len(middlewares))
-	_, s.File, s.Line, _ = runtime.Caller(1)
+	_, file, line, _ := runtime.Caller(1)
+
+	s.Line = line
+	s.File = filepath.FromSlash(file)
 
 	for i := len(middlewares) - 1; i >= 0; i-- {
 		var debugInfo string
