@@ -2,6 +2,8 @@ stack
 =====
 [ ![Codeship Status for go-on/stack](https://codeship.io/projects/7fa20300-38d9-0132-d3df-2a69fe4b0f90/status)](https://codeship.io/projects/42107)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/rv4pf8qwtj3n85vp?svg=true)](https://ci.appveyor.com/project/metakeule/stack)
+
 Package stack creates a fast and flexible middleware stack for http.Handlers.
 
 ## Features
