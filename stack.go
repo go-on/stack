@@ -75,23 +75,24 @@ func (s *Stack) String() string {
 	return fmt.Sprintf("<Stack\n  %p %s:%d \n%s\n>", s, s.File, s.Line, strings.Join(mw, "\n"))
 }
 
-func New(middlewares ...interface{}) *Stack {
-	var h http.Handler = http.HandlerFunc(noOp)
-	s := &Stack{}
-	s.Middleware = make([]string, len(middlewares))
+func NewWithContext(middlewares ...interface{}) *Stack {
+	mw := append([]interface{}{Context}, middlewares...)
+	s := New(mw...)
 	_, file, line, _ := runtime.Caller(1)
 
 	s.Line = line
 	s.File = filepath.FromSlash(file)
+	return s
+}
+
+// TODO make New a var and strip out the debugging things, instead create a new
+// file for building with debugging options (debugstack or something similar)
+// and overwrite the New var of this package when building with the debugging support
+var New = func(middlewares ...interface{}) *Stack {
+	var h http.Handler = http.HandlerFunc(noOp)
+	s := &Stack{}
 
 	for i := len(middlewares) - 1; i >= 0; i-- {
-		var debugInfo string
-		if insp, ok := middlewares[i].(fmt.Stringer); ok {
-			debugInfo = fmt.Sprintf("%T = %s", middlewares[i], insp.String())
-		} else {
-			debugInfo = fmt.Sprintf("%T = %#v", middlewares[i], middlewares[i])
-		}
-		s.Middleware[i] = debugInfo
 		var fn func(http.Handler) http.Handler
 		switch x := middlewares[i].(type) {
 		case func(http.Handler) http.Handler:

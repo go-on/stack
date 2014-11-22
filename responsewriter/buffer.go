@@ -49,6 +49,8 @@ func NewBuffer(w http.ResponseWriter) (bf *Buffer) {
 	bf.ResponseWriter = w
 	if ctx, ok := bf.ResponseWriter.(stack.Contexter); ok {
 		bf.Contexter = ctx
+	} else {
+		panic("no contexter")
 	}
 	bf.header = make(http.Header)
 	return
