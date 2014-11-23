@@ -1,4 +1,5 @@
 // +build debug
+
 package stack
 
 import (
