@@ -22,9 +22,9 @@ func TestResponseWriter(t *testing.T) {
 
 	rec := httptest.NewRecorder()
 	New(
-		Context,
+		// Context,
 		fn,
-	).ServeHTTP(rec, nil)
+	).ContextHandler().ServeHTTP(rec, nil)
 
 	expected := "ok"
 	if got := rec.Body.String(); got != expected {

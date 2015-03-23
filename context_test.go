@@ -65,10 +65,8 @@ func (a appendCtx) ServeHTTP(c Contexter, w http.ResponseWriter, r *http.Request
 
 func TestContext(t *testing.T) {
 	s := New(
-		Context,
 		appendCtx("prepended"),
 		setCtx("hiho"),
-		Context, // does not do anything
 		appendCtx("-appended"),
 		writeCtxNext,
 		delCtx,
@@ -77,7 +75,7 @@ func TestContext(t *testing.T) {
 	)
 
 	rec := httptest.NewRecorder()
-	s.ServeHTTP(rec, nil)
+	s.ContextHandler().ServeHTTP(rec, nil)
 
 	expected := "hiho-appended"
 	if got := rec.Body.String(); got != expected {

@@ -4,9 +4,8 @@ package stack_test
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/go-on/stack"
+	"net/http"
 )
 
 type Val string
@@ -35,14 +34,13 @@ func writeVal(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, ne
 
 func ExampleContext() {
 	s := stack.New(
-		stack.Context,
 		writeVal,
 		setVal,
 		writeVal,
 	)
 
 	r, _ := http.NewRequest("GET", "/", nil)
-	s.ServeHTTP(nil, r)
+	s.ContextHandler().ServeHTTP(nil, r)
 
 	// Output:
 	// no value found

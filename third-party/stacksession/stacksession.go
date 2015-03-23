@@ -14,7 +14,7 @@ import (
 	"github.com/go-on/stack/middleware"
 
 	"github.com/go-on/stack"
-	"github.com/gorilla/sessions"
+	"gopkg.in/go-on/sessions.v1"
 )
 
 type store struct {

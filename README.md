@@ -63,28 +63,36 @@ The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a 
 
 ## Batteries included
 
-Middleware can be found in the sub package stack/responsewriter.
+Middleware can be found in the sub package stack/middleware.
 
 ## Usage
 
 ```go
-  // define stacks
+  // define stack
   s := stack.New(
        // put your middleware here
        // from stacks point of view a http.Handler (may be the app or router) is just another middleware
   )
 
-  // use your stack
+  // use it
   http.Handle("/", s)
 ```
 
 ## Sharing Context
 
-The stack.Context middleware wraps the given http.ResponseWriter with a http.ResponseWriter that is also a
-stack.Contexter.
+The ContextHandler method returns an http.Handler that wraps the given http.ResponseWriter with a stack.Contexter.
 
-To access the contexter inside a http.Handler or some middleware, the ResponseWriter must be type asserted to
-a stack.Contexter.
+```go
+  // define stack
+  s := stack.New(
+       ...
+  )
+
+  // use it with a per request context
+  http.Handle("/", s.ContextHandler())
+```
+
+To access the context inside a http.Handler or some middleware, the ResponseWriter must be type asserted to the stack.Contexter.
 
 ```go
   func (rw http.ResponseWriter, req *http.Request) {
@@ -94,8 +102,7 @@ a stack.Contexter.
 ```
 
 
-Alternatively middlware might implement the stack.ContextHandler or stack.ContextMiddleware interface
-or have the corresponding function signatures.
+Alternatively middlware might implement stack.ContextHandler or stack.ContextMiddleware interface or have following function signatures.
 
 ```
   func(stack.Contexter, http.ResponseWriter, *http.Request){}
@@ -136,21 +143,19 @@ For each type only one value can be stored. The pointer of the type is stored an
   }
 ```
 
-Inside the stack, don't forget to add the stack.Context as first middleware.
-There is only one Context inside the outermost stack, no matter how often
-stack.Context is used.
+Don't forget to call the ContextHandler method on the outermost stack.
+The returned handler must not be embedded inside another stack.
 
 ```go
   func ExampleContextNew() {
     s := stack.New(
-      stack.Context,
       writeVal,
       &MyMiddleware{},
       writeVal,
     )
 
     r, _ := http.NewRequest("GET", "/", nil)
-    s.ServeHTTP(nil, r)
+    s.ContextHandler().ServeHTTP(nil, r)
 
     // Output:
     // no value found
@@ -215,21 +220,11 @@ Since only one Contexter may be used within a stack, it is always possible to as
 
 ### Q
 
-Why is the recommended way to use the Contexter interface to make a type assertion from the ResponseWriter to the Contexter interface without error handling?
+I get a panic "can't embed contextHandler" from the stack.New() function. Why?
 
 ### A
 
-Middleware stacks should be created before the server is handling requests and then not change anymore. And you should run tests. Then the assertion will blow up and that is correct because there is no reasonable way to handle such an error. It means that you have no stack.Context in your stack which is easy to fix.
-
-### Q
-
-What happens if my context is wrapped inside another context or response writer?
-
-### A
-
-stack.Context makes sure that only one context exists within a stack no matter how often it is included.
-
-All response writer wrappers of this package embed the stack.Contexter which is type asserted from the ResponseWriter and implement the stack.Contexter interface that way. This is the recommended way for own wrapping ResponseWriters.
+You are trying to embed a stack that is wrapped by a contextHandler as middleware to another stack. Simply remove the ContextHandler() method call from the inner stack as it is just allowed on the outermost stack.
 
 ## Credits
 

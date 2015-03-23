@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"github.com/abbot/go-http-auth"
 	"github.com/go-on/stack"
 	"github.com/go-on/stack/third-party/stackhttpauth"
+	"gopkg.in/go-on/go-http-auth.v1"
 )
 
 func secretBasic(user, realm string) string {
@@ -38,10 +38,10 @@ func ExampleBasic() {
 	// check that the context fulfills all requirements
 
 	stackBasic := stack.New(
-		stack.Context,
+		// stack.Context,
 		stackhttpauth.Basic("example.com", secretBasic),
 		app,
-	)
+	).ContextHandler()
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/", nil)
@@ -69,10 +69,10 @@ func ExampleBasic() {
 func ExampleDigest() {
 
 	stackDigest := stack.New(
-		stack.Context,
+		// stack.Context,
 		stackhttpauth.Digest("example.com", secretDigest),
 		app,
-	)
+	).ContextHandler()
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/", nil)

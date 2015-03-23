@@ -2,8 +2,9 @@ package stack
 
 import (
 	"fmt"
-	"path/filepath"
-	"runtime"
+	// "sync"
+	// "path/filepath"
+	// "runtime"
 	"strings"
 
 	"net/http"
@@ -65,6 +66,10 @@ func (s *Stack) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.h.ServeHTTP(w, req)
 }
 
+func (s *Stack) ContextHandler() *contextHandler {
+	return &contextHandler{s.h}
+}
+
 func (s *Stack) String() string {
 	var mw []string
 
@@ -75,6 +80,7 @@ func (s *Stack) String() string {
 	return fmt.Sprintf("<Stack\n  %p %s:%d \n%s\n>", s, s.File, s.Line, strings.Join(mw, "\n"))
 }
 
+/*
 func NewWithContext(middlewares ...interface{}) *Stack {
 	mw := append([]interface{}{Context}, middlewares...)
 	s := New(mw...)
@@ -84,52 +90,7 @@ func NewWithContext(middlewares ...interface{}) *Stack {
 	s.File = filepath.FromSlash(file)
 	return s
 }
-
-// TODO make New a var and strip out the debugging things, instead create a new
-// file for building with debugging options (debugstack or something similar)
-// and overwrite the New var of this package when building with the debugging support
-var New = func(middlewares ...interface{}) *Stack {
-	var h http.Handler = http.HandlerFunc(noOp)
-	s := &Stack{}
-
-	for i := len(middlewares) - 1; i >= 0; i-- {
-		var fn func(http.Handler) http.Handler
-		switch x := middlewares[i].(type) {
-		case func(http.Handler) http.Handler:
-			fn = x
-		case interface {
-			Wrap(http.Handler) http.Handler
-		}:
-			fn = x.Wrap
-		case http.Handler:
-			fn = end(x.ServeHTTP).middleware
-		case func(wr http.ResponseWriter, req *http.Request):
-			fn = end(x).middleware
-		case func(wr http.ResponseWriter, req *http.Request, next http.Handler):
-			fn = mwHandlerFunc(x).Middleware()
-		case interface {
-			ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-		}:
-			fn = mwHandler(x)
-		case func(ctx Contexter, wr http.ResponseWriter, req *http.Request):
-			fn = end(ctxHandlerFunc(x).ServeHTTP).middleware
-		case ctxHandler:
-			fn = end(ctxHandlerFunc(x.ServeHTTP).ServeHTTP).middleware
-		case func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler):
-			fn = mwCtxHandlerFunc(x).Middleware()
-		case interface {
-			ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-		}:
-			fn = mwCtxHandlerFunc(x.ServeHTTP).Middleware()
-		default:
-			panic(fmt.Sprintf("unsupported middleware type %T, value: %#v", x, x))
-		}
-
-		h = fn(h)
-	}
-	s.h = h
-	return s
-}
+*/
 
 type mwHandlerFunc func(wr http.ResponseWriter, req *http.Request, next http.Handler)
 

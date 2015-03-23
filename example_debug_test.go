@@ -42,7 +42,6 @@ func hello(wr http.ResponseWriter, req *http.Request) {
 func exampleDebug() {
 
 	w := stack.New(
-		stack.Context,
 		middleware.Before(s("hi")),
 		setctxA,
 		middleware.Before(

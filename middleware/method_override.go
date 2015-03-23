@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-on/method"
+	"gopkg.in/go-on/method.v1"
 
 	// "github.com/go-on/stack/wrap"
 )

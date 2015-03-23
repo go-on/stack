@@ -10,7 +10,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/abbot/go-http-auth"
+	"gopkg.in/go-on/go-http-auth.v1"
 	"github.com/go-on/stack"
 )
 

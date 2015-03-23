@@ -27,11 +27,11 @@ func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next ht
 func Example() {
 
 	s := stack.New(
-		stack.Context,
+		// stack.Context,
 		&stacknosurf.CheckToken{},
 		stacknosurf.SetToken{},
 		app,
-	)
+	).ContextHandler()
 
 	// here comes the tests
 	rec := httptest.NewRecorder()

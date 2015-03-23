@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-on/stack"
 
-	"github.com/justinas/nosurf"
+	"gopkg.in/go-on/nosurf.v1"
 )
 
 // Token is the type that is saved inside a wrap.Contexter and
