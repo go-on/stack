@@ -1,3 +1,7 @@
+/*
+Package router provides a simple router that nicely integrates with stacks and middleware.
+
+*/
 package router
 
 import (
