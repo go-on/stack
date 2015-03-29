@@ -11,7 +11,7 @@ package stacksession
 import (
 	"net/http"
 
-	"github.com/go-on/stack/middleware"
+	"github.com/go-on/stack/mw"
 
 	"github.com/go-on/stack"
 	"gopkg.in/go-on/sessions.v1"
@@ -51,7 +51,7 @@ func (s saveAndClear) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req
 		if ctx.Get(&sess) {
 			err := sess.Save(req, rw)
 			if err != nil {
-				middleware.SetError(err, ctx)
+				mw.SetError(err, ctx)
 			}
 		}
 	}()
@@ -59,5 +59,5 @@ func (s saveAndClear) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req
 }
 
 // SaveAndClear saves the session and clears up any references to the request.
-// it should be used at the beginning of the middleware chain (but after the Contexter)
+// it should be used at the beginning of the mw chain (but after the Contexter)
 var SaveAndClear = saveAndClear{}
