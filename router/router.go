@@ -8,6 +8,7 @@ import (
 	"github.com/go-on/stack"
 	"net/http"
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -49,12 +50,12 @@ func (r *Router) MountPath() string {
 }
 
 // SegmentMatch is the regular expression to which each path segment must match
-var SegmentMatch = regexp.MustCompile("^[a-z][a-z0-9]*$")
+var SegmentMatch = regexp.MustCompile("^[a-z][-.a-z0-9]*$")
 
 // validateSegment returns an error message, if the pathSegment is invalid and an empty string if valid
 func validateSegment(pathSegment string) (s string) {
 	if !SegmentMatch.MatchString(pathSegment) {
-		s = "invalid pathSegment syntax, must match ^[a-z][a-z0-9]*$"
+		s = "invalid pathSegment syntax, must match ^[a-z][-.a-z0-9]*$"
 	}
 	return
 }
@@ -344,4 +345,63 @@ func (r *Router) DELETEFunc(pathSegment string, h http.HandlerFunc) func(id stri
 // INDEXFunc is a shortcut for INDEX(pathSegment, http.HandlerFunc(fn))
 func (r *Router) INDEXFunc(pathSegment string, h http.HandlerFunc) func() string {
 	return r.INDEX(pathSegment, h)
+}
+
+type Getter interface {
+	GET(http.ResponseWriter, *http.Request)
+}
+
+type Indexer interface {
+	INDEX(http.ResponseWriter, *http.Request)
+}
+
+type Poster interface {
+	POST(http.ResponseWriter, *http.Request)
+}
+
+type Patcher interface {
+	PATCH(http.ResponseWriter, *http.Request)
+}
+
+type Putter interface {
+	PUT(http.ResponseWriter, *http.Request)
+}
+
+type Deleter interface {
+	DELETE(http.ResponseWriter, *http.Request)
+}
+
+func (r *Router) RouteObject(object interface{}, pathSegment string) (url func() string, urlParam func(string) string) {
+	if o, ok := object.(Getter); ok {
+		r.GETFunc(pathSegment, o.GET)
+	}
+
+	if o, ok := object.(Indexer); ok {
+		r.INDEXFunc(pathSegment, o.INDEX)
+	}
+
+	if o, ok := object.(Poster); ok {
+		r.POSTFunc(pathSegment, o.POST)
+	}
+
+	if o, ok := object.(Putter); ok {
+		r.PUTFunc(pathSegment, o.PUT)
+	}
+
+	if o, ok := object.(Patcher); ok {
+		r.PATCHFunc(pathSegment, o.PATCH)
+	}
+
+	if o, ok := object.(Deleter); ok {
+		r.DELETEFunc(pathSegment, o.DELETE)
+	}
+
+	fn1 := func() string { return path.Join(r.MountPath(), pathSegment) }
+	fn2 := func(param string) string { return path.Join(r.MountPath(), pathSegment, param) }
+	return fn1, fn2
+}
+
+// RelativePath returns the path relative to the mount path (makes only sense for path beneath the mountpath)
+func (r *Router) RelativePath(path string) (rel string, err error) {
+	return filepath.Rel(r.MountPath(), path)
 }
