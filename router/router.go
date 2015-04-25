@@ -31,11 +31,17 @@ type Router struct {
 	oncePut      sync.Once
 	subHandler   map[string]http.Handler
 	onceSub      sync.Once
+	notFound     http.Handler
 }
 
 // New returns a new router
 func New() *Router {
 	return &Router{}
+}
+
+func (r *Router) SetNotFound(h http.Handler) *Router {
+	r.notFound = h
+	return r
 }
 
 // MountPath returns a path that is prefixed to each path segment of a route.
@@ -254,8 +260,18 @@ func (r *Router) serveRoute(prefix string, w http.ResponseWriter, rq *http.Reque
 	var handler = r.findHandler(rq, prefix)
 
 	if handler == nil {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte(`method not allowed`))
+		if r.notFound != nil {
+			r.notFound.ServeHTTP(w, rq)
+			return
+		}
+
+		if rq.Method == "GET" {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte(`not found`))
+		} else {
+			w.WriteHeader(http.StatusMethodNotAllowed)
+			w.Write([]byte(`method not allowed`))
+		}
 		return
 	}
 	handler.ServeHTTP(w, rq)
