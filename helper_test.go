@@ -47,7 +47,7 @@ func (noHTTPWriter) WriteHeader(i int) {
 type writeString string
 
 func (w writeString) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
-	fmt.Fprint(wr, string(w))
+	wr.Write([]byte(string(w)))
 }
 
 func (w writeString) ServeHTTPNext(wr http.ResponseWriter, req *http.Request, next http.Handler) {

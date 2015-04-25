@@ -23,7 +23,7 @@ func (t *Token) Swap(repl interface{}) {
 // Tokenfield is the name of the form field that submits a csrf token
 var TokenField = "csrf_token"
 
-// SetToken is a wrap.Wrapper that sets a csrf token in the Contexter
+// SetToken is a middleware that sets a csrf token in the Contexter
 // (response writer) on GET requests.
 type SetToken struct{}
 
@@ -35,7 +35,7 @@ func (SetToken) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req *http
 	next.ServeHTTP(rw, req)
 }
 
-// CheckToken is a Wrapper that checks the token via the github.com/justinas/nosurf
+// CheckToken is a middleware that checks the token via the github.com/justinas/nosurf
 // package. Its attributes relate to the corresponding nosurf options. If they are nil,
 // they are not set.
 type CheckToken struct {
@@ -47,7 +47,7 @@ type CheckToken struct {
 	ExemptFunc     func(r *http.Request) bool
 }
 
-func (c *CheckToken) Wrap(next http.Handler) http.Handler {
+func (c *CheckToken) ServeHTTP(w http.ResponseWriter, r *http.Request, next http.Handler) {
 	ns := nosurf.New(next)
 	if c.BaseCookie != nil {
 		ns.SetBaseCookie(*c.BaseCookie)
@@ -71,5 +71,5 @@ func (c *CheckToken) Wrap(next http.Handler) http.Handler {
 	if c.ExemptFunc != nil {
 		ns.ExemptFunc(c.ExemptFunc)
 	}
-	return ns
+	ns.ServeHTTP(w, r)
 }

@@ -39,15 +39,13 @@ func (p print3) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
 	fmt.Println(p)
 }
 
-func ExampleNew() {
-	s := stack.New(
-		print1("ready..."),
-		print2("steady..."),
-		print3("go!"),
-		// if there should be a handler after this, you will need the Before wrapper from go-on/wrack/middleware
-	)
+func ExampleStack() {
+	var s stack.Stack
+	s.Use(print1("ready..."))
+	s.UseWrapper(print2("steady..."))
+	s.UseHandler(print3("go!"))
 	r, _ := http.NewRequest("GET", "/", nil)
-	s.ServeHTTP(nil, r)
+	s.Handler().ServeHTTP(nil, r)
 
 	// Output:
 	// ready...steady...go!

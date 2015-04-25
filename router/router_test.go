@@ -352,7 +352,7 @@ func TestHandleFunc(t *testing.T) {
 		{"GET", "/a/", "a", true, 200, ""},
 		{"GET", "/a/1", "a", true, 200, ""},
 		{"GET", "/a/b/1", "a", true, 200, ""},
-		{"GET", "/b/1", "a", false, 405, ""},
+		{"GET", "/b/1", "a", false, 404, ""},
 
 		{"POST", "/b", "b", true, 200, ""},
 		{"POST", "/b/", "b", true, 200, ""},
@@ -384,9 +384,9 @@ func TestHandleFunc(t *testing.T) {
 		{"GET", "/m/a/", "a", true, 200, "m"},
 		{"GET", "/m/a/1", "a", true, 200, "m"},
 		{"GET", "/m/a/b/1", "a", true, 200, "m"},
-		{"GET", "/m/b/1", "a", false, 405, "m"},
-		{"GET", "/x/a", "a", false, 405, "m"},
-		{"GET", "/a", "a", false, 405, "m"},
+		{"GET", "/m/b/1", "a", false, 404, "m"},
+		{"GET", "/x/a", "a", false, 404, "m"},
+		{"GET", "/a", "a", false, 404, "m"},
 
 		{"POST", "/m/b", "b", true, 200, "m"},
 		{"POST", "/m/b/", "b", true, 200, "m"},
@@ -474,9 +474,9 @@ func TestMethodHandlers(t *testing.T) {
 		// GET for details
 		{"GET", "/a/1", "GET", "a", "1", true, 200, ""},     // working
 		{"GET", "/a/1/", "GET", "a", "1", true, 200, ""},    // working: additional slash
-		{"GET", "/a", "GET", "a", "1", false, 405, ""},      // wrong GET: parameter missing (1)
-		{"GET", "/a/", "GET", "a", "1", false, 405, ""},     // wrong GET: parameter missing (2)
-		{"GET", "/a/1", "GET", "b", "1", false, 405, ""},    // wrong url
+		{"GET", "/a", "GET", "a", "1", false, 404, ""},      // wrong GET: parameter missing (1)
+		{"GET", "/a/", "GET", "a", "1", false, 404, ""},     // wrong GET: parameter missing (2)
+		{"GET", "/a/1", "GET", "b", "1", false, 404, ""},    // wrong url
 		{"POST", "/a/1", "GET", "a", "1", false, 405, ""},   // wrong method: POST instead of GET
 		{"PUT", "/a/1", "GET", "a", "1", false, 405, ""},    // wrong method: PUT instead of GET
 		{"PATCH", "/a/1", "GET", "a", "1", false, 405, ""},  // wrong method: PATCH instead of GET
@@ -485,8 +485,8 @@ func TestMethodHandlers(t *testing.T) {
 		// GET without details
 		{"GET", "/b", "GET", "b", "", true, 200, ""},     // working
 		{"GET", "/b/", "GET", "b", "", true, 200, ""},    // working: additional slash
-		{"GET", "/b/1", "GET", "b", "", false, 405, ""},  // wrong GET: additional parameter
-		{"GET", "/b", "GET", "c", "", false, 405, ""},    // wrong url
+		{"GET", "/b/1", "GET", "b", "", false, 404, ""},  // wrong GET: additional parameter
+		{"GET", "/b", "GET", "c", "", false, 404, ""},    // wrong url
 		{"POST", "/b", "GET", "b", "", false, 405, ""},   // wrong method: POST instead of GET
 		{"PUT", "/b", "GET", "b", "", false, 405, ""},    // wrong method: PUT instead of GET
 		{"PATCH", "/b", "GET", "b", "", false, 405, ""},  // wrong method: PATCH instead of GET
@@ -497,7 +497,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"POST", "/c/", "POST", "c", "", true, 200, ""},   // working: additional slash
 		{"POST", "/c/1", "POST", "c", "", false, 405, ""}, // wrong GET: additional parameter
 		{"POST", "/c", "POST", "d", "", false, 405, ""},   // wrong url
-		{"GET", "/c", "POST", "c", "", false, 405, ""},    // wrong method: GET instead of POST
+		{"GET", "/c", "POST", "c", "", false, 404, ""},    // wrong method: GET instead of POST
 		{"PUT", "/c", "POST", "c", "", false, 405, ""},    // wrong method: PUT instead of POST
 		{"PATCH", "/c", "POST", "c", "", false, 405, ""},  // wrong method: PATCH instead of POST
 		{"DELETE", "/c", "POST", "c", "", false, 405, ""}, // wrong method: DELETE instead of POST
@@ -509,7 +509,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"PUT", "/d/", "PUT", "d", "1", false, 405, ""},     // wrong PUT: parameter missing (2)
 		{"PUT", "/d/1", "PUT", "b", "1", false, 405, ""},    // wrong URL
 		{"POST", "/d/1", "PUT", "d", "1", false, 405, ""},   // wrong method: POST instead of PUT
-		{"GET", "/d/1", "PUT", "d", "1", false, 405, ""},    // wrong method: GET instead of PUT
+		{"GET", "/d/1", "PUT", "d", "1", false, 404, ""},    // wrong method: GET instead of PUT
 		{"PATCH", "/d/1", "PUT", "d", "1", false, 405, ""},  // wrong method: PATCH instead of PUT
 		{"DELETE", "/d/1", "PUT", "d", "1", false, 405, ""}, // wrong method: DELETE instead of PUT
 
@@ -521,7 +521,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"PATCH", "/e/1", "PATCH", "b", "1", false, 405, ""},  // wrong URL
 		{"POST", "/e/1", "PATCH", "e", "1", false, 405, ""},   // wrong method: POST instead of PATCH
 		{"PUT", "/e/1", "PATCH", "e", "1", false, 405, ""},    // wrong method: PUT instead of PATCH
-		{"GET", "/e/1", "PATCH", "e", "1", false, 405, ""},    // wrong method: GET instead of PATCH
+		{"GET", "/e/1", "PATCH", "e", "1", false, 404, ""},    // wrong method: GET instead of PATCH
 		{"DELETE", "/e/1", "PATCH", "e", "1", false, 405, ""}, // wrong method: DELETE instead of PATCH
 
 		// DELETE
@@ -533,41 +533,41 @@ func TestMethodHandlers(t *testing.T) {
 		{"POST", "/f/1", "DELETE", "f", "1", false, 405, ""},   // wrong method: POST instead of DELETE
 		{"PUT", "/f/1", "DELETE", "f", "1", false, 405, ""},    // wrong method: PUT instead of DELETE
 		{"PATCH", "/f/1", "DELETE", "f", "1", false, 405, ""},  // wrong method: PATCH instead of DELETE
-		{"GET", "/f/1", "DELETE", "f", "1", false, 405, ""},    // wrong method: GET instead of DELETE
+		{"GET", "/f/1", "DELETE", "f", "1", false, 404, ""},    // wrong method: GET instead of DELETE
 
 		// Mounted
 
 		// GET mounted for details
 		{"GET", "/m/a/1", "GET", "a", "1", true, 200, "m"},     // working
 		{"GET", "/m/a/1/", "GET", "a", "1", true, 200, "m"},    // working: additional slash
-		{"GET", "/m/a", "GET", "a", "1", false, 405, "m"},      // wrong GET: parameter missing (1)
-		{"GET", "/m/a/", "GET", "a", "1", false, 405, "m"},     // wrong GET: parameter missing (2)
-		{"GET", "/m/a/1", "GET", "b", "1", false, 405, "m"},    // wrong url
+		{"GET", "/m/a", "GET", "a", "1", false, 404, "m"},      // wrong GET: parameter missing (1)
+		{"GET", "/m/a/", "GET", "a", "1", false, 404, "m"},     // wrong GET: parameter missing (2)
+		{"GET", "/m/a/1", "GET", "b", "1", false, 404, "m"},    // wrong url
 		{"POST", "/m/a/1", "GET", "a", "1", false, 405, "m"},   // wrong method: POST instead of GET
 		{"PUT", "/m/a/1", "GET", "a", "1", false, 405, "m"},    // wrong method: PUT instead of GET
 		{"PATCH", "/m/a/1", "GET", "a", "1", false, 405, "m"},  // wrong method: PATCH instead of GET
 		{"DELETE", "/m/a/1", "GET", "a", "1", false, 405, "m"}, // wrong method: DELETE instead of GET
-		{"GET", "/x/a/1", "GET", "a", "1", false, 405, "m"},    // wrong mountpoint
-		{"GET", "/a/1", "GET", "a", "1", false, 405, "m"},      // missing mountpoint
+		{"GET", "/x/a/1", "GET", "a", "1", false, 404, "m"},    // wrong mountpoint
+		{"GET", "/a/1", "GET", "a", "1", false, 404, "m"},      // missing mountpoint
 
 		// GET mounted without details
 		{"GET", "/m/b", "GET", "b", "", true, 200, "m"},     // working
 		{"GET", "/m/b/", "GET", "b", "", true, 200, "m"},    // working: additional slash
-		{"GET", "/m/b/1", "GET", "b", "", false, 405, "m"},  // wrong GET: additional parameter
-		{"GET", "/m/b", "GET", "c", "", false, 405, "m"},    // wrong url
+		{"GET", "/m/b/1", "GET", "b", "", false, 404, "m"},  // wrong GET: additional parameter
+		{"GET", "/m/b", "GET", "c", "", false, 404, "m"},    // wrong url
 		{"POST", "/m/b", "GET", "b", "", false, 405, "m"},   // wrong method: POST instead of GET
 		{"PUT", "/m/b", "GET", "b", "", false, 405, "m"},    // wrong method: PUT instead of GET
 		{"PATCH", "/m/b", "GET", "b", "", false, 405, "m"},  // wrong method: PATCH instead of GET
 		{"DELETE", "/m/b", "GET", "b", "", false, 405, "m"}, // wrong method: DELETE instead of GET
-		{"GET", "/x/b", "GET", "b", "", false, 405, "m"},    // wrong mountpoint
-		{"GET", "/b", "GET", "b", "1", false, 405, "m"},     // missing mountpoint
+		{"GET", "/x/b", "GET", "b", "", false, 404, "m"},    // wrong mountpoint
+		{"GET", "/b", "GET", "b", "1", false, 404, "m"},     // missing mountpoint
 
 		// POST mounted
 		{"POST", "/m/c", "POST", "c", "", true, 200, "m"},    // working
 		{"POST", "/m/c/", "POST", "c", "", true, 200, "m"},   // working: additional slash
 		{"POST", "/m/c/1", "POST", "c", "", false, 405, "m"}, // wrong GET: additional parameter
 		{"POST", "/m/c", "POST", "d", "", false, 405, "m"},   // wrong url
-		{"GET", "/m/c", "POST", "c", "", false, 405, "m"},    // wrong method: GET instead of POST
+		{"GET", "/m/c", "POST", "c", "", false, 404, "m"},    // wrong method: GET instead of POST
 		{"PUT", "/m/c", "POST", "c", "", false, 405, "m"},    // wrong method: PUT instead of POST
 		{"PATCH", "/m/c", "POST", "c", "", false, 405, "m"},  // wrong method: PATCH instead of POST
 		{"DELETE", "/m/c", "POST", "c", "", false, 405, "m"}, // wrong method: DELETE instead of POST
@@ -581,7 +581,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"PUT", "/m/d/", "PUT", "d", "1", false, 405, "m"},     // wrong PUT: parameter missing (2)
 		{"PUT", "/m/d/1", "PUT", "b", "1", false, 405, "m"},    // wrong URL
 		{"POST", "/m/d/1", "PUT", "d", "1", false, 405, "m"},   // wrong method: POST instead of PUT
-		{"GET", "/m/d/1", "PUT", "d", "1", false, 405, "m"},    // wrong method: GET instead of PUT
+		{"GET", "/m/d/1", "PUT", "d", "1", false, 404, "m"},    // wrong method: GET instead of PUT
 		{"PATCH", "/m/d/1", "PUT", "d", "1", false, 405, "m"},  // wrong method: PATCH instead of PUT
 		{"DELETE", "/m/d/1", "PUT", "d", "1", false, 405, "m"}, // wrong method: DELETE instead of PUT
 		{"PUT", "/x/d/1", "PUT", "d", "1", false, 405, "m"},    // wrong mountpoint
@@ -595,7 +595,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"PATCH", "/m/e/1", "PATCH", "b", "1", false, 405, "m"},  // wrong URL
 		{"POST", "/m/e/1", "PATCH", "e", "1", false, 405, "m"},   // wrong method: POST instead of PATCH
 		{"PUT", "/m/e/1", "PATCH", "e", "1", false, 405, "m"},    // wrong method: PUT instead of PATCH
-		{"GET", "/m/e/1", "PATCH", "e", "1", false, 405, "m"},    // wrong method: GET instead of PATCH
+		{"GET", "/m/e/1", "PATCH", "e", "1", false, 404, "m"},    // wrong method: GET instead of PATCH
 		{"DELETE", "/m/e/1", "PATCH", "e", "1", false, 405, "m"}, // wrong method: DELETE instead of PATCH
 		{"PATCH", "/x/e/1", "PATCH", "e", "1", false, 405, "m"},  // wrong mountpoint
 		{"PATCH", "/e/1", "PATCH", "e", "1", false, 405, "m"},    // missing mountpoint
@@ -609,7 +609,7 @@ func TestMethodHandlers(t *testing.T) {
 		{"POST", "/m/f/1", "DELETE", "f", "1", false, 405, "m"},   // wrong method: POST instead of DELETE
 		{"PUT", "/m/f/1", "DELETE", "f", "1", false, 405, "m"},    // wrong method: PUT instead of DELETE
 		{"PATCH", "/m/f/1", "DELETE", "f", "1", false, 405, "m"},  // wrong method: PATCH instead of DELETE
-		{"GET", "/m/f/1", "DELETE", "f", "1", false, 405, "m"},    // wrong method: GET instead of DELETE
+		{"GET", "/m/f/1", "DELETE", "f", "1", false, 404, "m"},    // wrong method: GET instead of DELETE
 		{"DELETE", "/x/f/1", "DELETE", "f", "1", false, 405, "m"}, // wrong mountpoint
 		{"DELETE", "/f/1", "DELETE", "f", "1", false, 405, "m"},   // missing mountpoint
 

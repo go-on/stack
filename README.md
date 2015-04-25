@@ -18,20 +18,29 @@ Package stack creates a fast and flexible middleware stack for http.Handlers.
   - no dependency apart from the standard library
   - easy to create adapters / wrappers for 3rd party middleware
 
+## Status
 
-## Benchmarks (Go 1.3)
+Not ready for general consumption yet. API may change at any time.
 
-The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a loop within a single http.Handler
+## Benchmarks (Go 1.4)
+
+The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a loop within a single http.Handler on my laptop
 
 ```
-  BenchmarkServing2Simple    2000000         847 ns/op 1.00x
-  BenchmarkServing2Wrappers  2000000         899 ns/op 1.06x
-
-  BenchmarkServing100Simple    50000       40715 ns/op 1.00x
-  BenchmarkServing100Wrappers  50000       42865 ns/op 1.05x
-
-  BenchmarkServing50Simple    100000       20354 ns/op 1.00x
-  BenchmarkServing50Wrappers  100000       21591 ns/op 1.06x
+  BenchmarkServing2Simple       10000000     201 ns/op 1.00x 
+  BenchmarkServing2Wrappers      5000000     250 ns/op 1.24x
+  
+  BenchmarkServing50Simple        300000    4833 ns/op 1.00x
+  BenchmarkServing50Wrappers      200000    6503 ns/op 1.35x
+  
+  BenchmarkServing100Simple       200000    9810 ns/op 1.00x
+  BenchmarkServing100Wrappers     100000   13489 ns/op 1.38x
+  
+  BenchmarkServing500Simple        30000   48970 ns/op 1.00x
+  BenchmarkServing500Wrappers      20000   75562 ns/op 1.54x
+  
+  BenchmarkServing1000Simple       20000   98737 ns/op 1.00x
+  BenchmarkServing1000Wrappers     10000  163671 ns/op 1.66x
 ```
 
 ## Accepted middleware
@@ -63,117 +72,78 @@ The overhead of n writes to http.ResponseWriter via n wrappers vs n writes in a 
 
 ## Batteries included
 
-Middleware can be found in the sub package stack/middleware.
+Middleware can be found in the sub package stack/mw.
+
+## Router
+
+A simple router is included in the sub package router.
 
 ## Usage
 
 ```go
-  // define stack
-  s := stack.New(
-       // put your middleware here
-       // from stacks point of view a http.Handler (may be the app or router) is just another middleware
-  )
+  // define middleware
+  func middleware(w http.ResponseWriter, r *http.Request, next http.Handler) {
+    w.Write([]byte("middleware speaking\n"))
+    next.ServeHTTP(w,r)
+  }
 
+  // define app
+  func app(w http.ResponseWriter, r *http.Request) {
+    w.Write([]byte("app here"))
+  }  
+
+  // define stack
+  var s Stack
+  s.UseFunc(middleware)
+  // add other middleware for each supported type there is a UseXXX method
+  
   // use it
-  http.Handle("/", s)
+  http.Handle("/", s.WrapFunc(app))
 ```
 
 ## Sharing Context
 
-The ContextHandler method returns an http.Handler that wraps the given http.ResponseWriter with a stack.Contexter.
+Context is shared by wrapping the http.ResponseWriter with another one that also implements the Contexter interface. This new ResponseWriter is then passed to the middleware. In order to use the context the middleware must have
+the Contexter as first parameter. 
+Context data can be any type that has a pointer method implementing the Swapper interface. Each type can only be saved once per request.
 
 ```go
-  // define stack
-  s := stack.New(
-       ...
-  )
+  // define context data type, may be any type
+  type Name string
 
-  // use it with a per request context
-  http.Handle("/", s.ContextHandler())
-```
-
-To access the context inside a http.Handler or some middleware, the ResponseWriter must be type asserted to the stack.Contexter.
-
-```go
-  func (rw http.ResponseWriter, req *http.Request) {
-     ctx := rw.(stack.Contexter)
-     ...
-  }
-```
-
-
-Alternatively middlware might implement stack.ContextHandler or stack.ContextMiddleware interface or have following function signatures.
-
-```
-  func(stack.Contexter, http.ResponseWriter, *http.Request){}
-  func(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler){}
-
-  func (...) ServeHTTP(stack.Contexter, http.ResponseWriter, *http.Request){}
-  func (...) ServeHTTP(stack.Contexter, http.ResponseWriter, *http.Request, next http.Handler)
-```
-
-To share per request context between middlewares, define a type for your data.
-For each type only one value can be stored. The pointer of the type is stored and must implement the Swapper interface.
-
-```go
-  type MyVal string
-
+  // implement Swapper interface
   // Swap replaces the value of m with the value of val
-  func (m *MyVal) Swap(val interface{}) {
-     *m = *(val.(*MyVal)) // will never panic
+  func (n *Name) Swap(val interface{}) {
+    *n = *(val.(*Name)) // will never panic
   }
 
-  type MyMiddleware struct{}
-
-  func (mw *MyMiddleware) ServeHTTP(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
-    var val MyVal = "some value"
-    ctx.Set(&val)
-    next.ServeHTTP(rw,req)
+  // define middleware that uses context
+  func middleware(ctx stack.Contexter, w http.ResponseWriter, r *http.Request, next http.Handler) {
+    var n Name = "Hulk"
+    ctx.Set(&n)
+    next.ServeHTTP(w, r)
   }
 
-  func writeVal(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
-    var val MyVal
-
-    if found := ctx.Get(&val); found {
-      fmt.Printf("value: %s\n", string(val))
-    } else {
-      fmt.Println("no value found")
-    }
-    next.ServeHTTP(rw, req)
+  // define app that uses context
+  func app(ctx stack.Contexter, w http.ResponseWriter, r *http.Request) {
+    var n Name
+    ctx.Get(&n)
+    w.Write([]byte("name is " + string(n)))
   }
+
+  // define stack
+  s := stack.New()
+  s.UseFuncWithContext(middleware)
+  // add other middleware for each supported type there is a UseXXXWithContext method
+       
+
+  // make sure to call WrapWithContext or WrapFuncWithContext to create the context object
+  http.Handle("/", s.WrapFuncWithContext(app))
 ```
-
-Don't forget to call the ContextHandler method on the outermost stack.
-The returned handler must not be embedded inside another stack.
-
-```go
-  func ExampleContextNew() {
-    s := stack.New(
-      writeVal,
-      &MyMiddleware{},
-      writeVal,
-    )
-
-    r, _ := http.NewRequest("GET", "/", nil)
-    s.ContextHandler().ServeHTTP(nil, r)
-
-    // Output:
-    // no value found
-    // value: some value
-  }
-```
-
-## Debugging
-
-A Stack tracks the File and Line of its definition and saves middleware strings
-that can have even more detailed information if the middleware is a fmt.Stringer.
-
-see example_debug_test.go for an example
 
 ## Original ResponseWriter
 
-To get access to the original ResponseWriter there are several methods. Here is an example
-of using the original ResponseWriter to type assert it to a http.Flusher.
+To get access to the original ResponseWriter there are several methods. Here is an example of using the original ResponseWriter to type assert it to a http.Flusher.
 
 ```go
   // access the original http.ResponseWriter to flush
@@ -207,6 +177,27 @@ of using the original ResponseWriter to type assert it to a http.Flusher.
 The package stack.responsewriter provides some ResponseWriter wrappers that help with development of middleware
 and also support context sharing via embedding of a stack.Contexter if it is available.
 
+## Server
+
+A simple ready-to-go server is inside the server subpackage.
+
+```go
+
+package main
+
+import (
+  "github.com/go-on/stack/server"
+  "github.com/go-on/stack/mw"
+)
+
+func main() {
+  s := server.New()
+  s.INDEX("hu", mw.TextString("hu"))
+  s.ListenAndServe(":8080")
+}
+
+```
+
 ## FAQ
 
 ### Q
@@ -217,14 +208,6 @@ e.g. http.Flusher. If it is wrapped that underlying implementation is not access
 ### A
 
 Since only one Contexter may be used within a stack, it is always possible to ask the Contexter for the underlying ResponseWriter. This is what helper functions like ReclaimResponseWriter(), Flush(), CloseNotify() and Hijack() do.
-
-### Q
-
-I get a panic "can't embed contextHandler" from the stack.New() function. Why?
-
-### A
-
-You are trying to embed a stack that is wrapped by a contextHandler as middleware to another stack. Simply remove the ContextHandler() method call from the inner stack as it is just allowed on the outermost stack.
 
 ## Credits
 

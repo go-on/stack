@@ -12,7 +12,7 @@ import (
 )
 
 // app serves the form value "a" for POST requests and otherwise the token
-func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
+func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		req.ParseForm()
 		rw.Write([]byte(req.FormValue("a")))
@@ -25,12 +25,10 @@ func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next ht
 }
 
 func Example() {
-
-	s := stack.New(
-		&stacknosurf.CheckToken{},
-		stacknosurf.SetToken{},
-		app,
-	).ContextHandler()
+	s := stack.New().
+		Use(&stacknosurf.CheckToken{}).
+		UseWithContext(stacknosurf.SetToken{}).
+		WrapFuncWithContext(app)
 
 	// here comes the tests
 	rec := httptest.NewRecorder()

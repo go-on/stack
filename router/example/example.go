@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-on/stack"
 	"github.com/go-on/stack/mw"
 	"github.com/go-on/stack/router"
 	"net/http"
@@ -13,9 +14,12 @@ var (
 		hello     func(string) string
 	}
 
-	layoutMW = []interface{}{
-		mw.Around(mw.HTMLString("<h1>Example</h1>"), mw.HTMLString("<h2>End</h2>")),
-	}
+	layoutMW = stack.New().Use(
+		mw.Around(
+			mw.HTMLString("<h1>Example</h1>"),
+			mw.HTMLString("<h2>End</h2>"),
+		),
+	)
 
 	middle = router.New()
 	sub    = router.New()
@@ -31,7 +35,7 @@ func init() {
 func main() {
 	top := router.New()
 	sub.Mount("p", middle)
-	middle.Mount("x", top, layoutMW...)
+	middle.MountAndWrap("x", top, layoutMW)
 
 	top.INDEX("", mw.TemporaryRedirect(urls.idx()))
 	http.ListenAndServe(":8080", top)

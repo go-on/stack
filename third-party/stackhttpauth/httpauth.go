@@ -10,8 +10,8 @@ import (
 	"io"
 	"net/http"
 
-	"gopkg.in/go-on/go-http-auth.v1"
 	"github.com/go-on/stack"
+	"gopkg.in/go-on/go-http-auth.v1"
 )
 
 type AuthenticatedRequest struct {

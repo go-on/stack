@@ -113,24 +113,31 @@ func (r *Router) HandleFunc(pathSegment string, h http.HandlerFunc) {
 	r.Handle(pathSegment, h)
 }
 
+// MountAndWrap is like Mount but wraps the current router with the given wrapper
+// when mounting it
+func (r *Router) MountAndWrap(pathSegment string, parent *Router, wr stack.Wrapper) {
+	if wr != nil {
+		r.mount(pathSegment, parent, wr.Wrap(r))
+		return
+	}
+	r.mount(pathSegment, parent, r)
+
+}
+
 // Mount mounts the router beneath the given parent under the given pathSegment.
 // A router may only be mounted once. But a router may be parent of many subrouters as long as
 // they have different pathSegmentes. The pathSegment must match to SegmentMatch.
 // Any violation of this rules results in a panic and mounting is meant to be done on startup.
 // The optional middleware will surround the router
-func (r *Router) Mount(pathSegment string, parent *Router, middleware ...interface{}) {
+func (r *Router) Mount(pathSegment string, parent *Router) {
+	r.mount(pathSegment, parent, r)
+}
+
+func (r *Router) mount(pathSegment string, parent *Router, h http.Handler) {
 	if r.prefix != "" {
 		panic("cannot mount the same sub router twice")
 	}
 
-	var h http.Handler
-
-	if len(middleware) > 0 {
-		middleware = append(middleware, r)
-		h = stack.New(middleware...)
-	} else {
-		h = r
-	}
 	parent.registerSubHandler(pathSegment, h)
 
 	r.parent = parent

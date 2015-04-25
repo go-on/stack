@@ -39,22 +39,21 @@ func hello(wr http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	innerStack := stack.New().
+		Use(mw.Before(s("inner1"))).
+		Use(mw.Before(s("inner2"))).
+		UseFuncWithContext(printctxA)
 
-	w := stack.New(
-		mw.Before(s("hi")),
-		setctxA,
-		mw.Before(
-			stack.New(
-				mw.Before(s("inner1")),
-				mw.Before(s("inner2")),
-				printctxA,
-			),
-		),
-		mw.Before(stack.Handler(hello)),
-		s("end"),
-	)
+	lastStack := stack.New().UseHandlerFunc(hello)
 
-	h := w.ContextHandler()
+	w := stack.New().
+		Use(mw.Before(s("hi"))).
+		UseFuncWithContext(setctxA).
+		UseWrapper(innerStack).
+		UseWrapper(lastStack).
+		UseHandler(s("end"))
+
+	h := w.HandlerWithContext()
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/", nil)
 	h.ServeHTTP(rec, req)

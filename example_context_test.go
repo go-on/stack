@@ -32,15 +32,14 @@ func writeVal(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, ne
 	next.ServeHTTP(rw, req)
 }
 
-func ExampleContext() {
-	s := stack.New(
-		writeVal,
-		setVal,
-		writeVal,
-	)
+func ExampleContexter() {
+	var s stack.Stack
+	s.UseFuncWithContext(writeVal)
+	s.UseFuncWithContext(setVal)
+	s.UseFuncWithContext(writeVal)
 
 	r, _ := http.NewRequest("GET", "/", nil)
-	s.ContextHandler().ServeHTTP(nil, r)
+	s.HandlerWithContext().ServeHTTP(nil, r)
 
 	// Output:
 	// no value found

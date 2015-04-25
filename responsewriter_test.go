@@ -21,10 +21,9 @@ func TestResponseWriter(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
-	New(
-		// Context,
-		fn,
-	).ContextHandler().ServeHTTP(rec, nil)
+	var s Stack
+	s.UseHandlerFuncWithContext(fn)
+	s.HandlerWithContext().ServeHTTP(rec, nil)
 
 	expected := "ok"
 	if got := rec.Body.String(); got != expected {

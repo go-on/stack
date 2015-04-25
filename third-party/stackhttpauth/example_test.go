@@ -27,7 +27,7 @@ func secretDigest(user, realm string) string {
 	return ""
 }
 
-func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request, next http.Handler) {
+func app(ctx stack.Contexter, rw http.ResponseWriter, req *http.Request) {
 	var authReq stackhttpauth.AuthenticatedRequest
 	ctx.Get(&authReq)
 	rw.Write([]byte("user " + authReq.Username + " authenticated"))
@@ -37,11 +37,9 @@ func ExampleBasic() {
 
 	// check that the context fulfills all requirements
 
-	stackBasic := stack.New(
-		// stack.Context,
-		stackhttpauth.Basic("example.com", secretBasic),
-		app,
-	).ContextHandler()
+	stackBasic := stack.New().
+		UseWrapper(stackhttpauth.Basic("example.com", secretBasic)).
+		WrapFuncWithContext(app)
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/", nil)
@@ -68,11 +66,9 @@ func ExampleBasic() {
 
 func ExampleDigest() {
 
-	stackDigest := stack.New(
-		// stack.Context,
-		stackhttpauth.Digest("example.com", secretDigest),
-		app,
-	).ContextHandler()
+	stackDigest := stack.New().
+		UseWrapper(stackhttpauth.Digest("example.com", secretDigest)).
+		WrapFuncWithContext(app)
 
 	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/", nil)

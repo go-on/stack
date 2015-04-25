@@ -64,18 +64,17 @@ func (a appendCtx) ServeHTTP(c Contexter, w http.ResponseWriter, r *http.Request
 }
 
 func TestContext(t *testing.T) {
-	s := New(
-		appendCtx("prepended"),
-		setCtx("hiho"),
-		appendCtx("-appended"),
-		writeCtxNext,
-		delCtx,
-		writeCtx,
-		writeCtx2{},
-	)
+	var s Stack
+	s.UseWithContext(appendCtx("prepended"))
+	s.UseWithContext(setCtx("hiho"))
+	s.UseWithContext(appendCtx("-appended"))
+	s.UseFuncWithContext(writeCtxNext)
+	s.UseFuncWithContext(delCtx)
+	s.UseHandlerFuncWithContext(writeCtx)
+	s.UseHandlerWithContext(writeCtx2{})
 
 	rec := httptest.NewRecorder()
-	s.ContextHandler().ServeHTTP(rec, nil)
+	s.HandlerWithContext().ServeHTTP(rec, nil)
 
 	expected := "hiho-appended"
 	if got := rec.Body.String(); got != expected {

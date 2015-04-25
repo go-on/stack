@@ -1,216 +1,113 @@
+// +build go1.1
+
 package stack
 
 import (
-	"fmt"
-	// "sync"
-	// "path/filepath"
-	// "runtime"
-	"strings"
-
 	"net/http"
 )
 
-var noOp = http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
-
-type Middleware interface {
-	ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
+func New() (s *Stack) {
+	return &Stack{}
 }
 
-type ContextHandler interface {
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
+// Stack is a stack of middlewares that handle http requests
+type Stack []func(http.Handler) http.Handler
+
+// Use adds the given middleware to the middleware stack
+func (s *Stack) Use(mw Middleware) *Stack {
+	return s.UseWrapperFunc(mwHandler(mw))
 }
 
-type ContextMiddleware interface {
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
+// UseFunc adds the given function to the middleware stack
+func (s *Stack) UseFunc(fn func(wr http.ResponseWriter, req *http.Request, next http.Handler)) *Stack {
+	return s.UseWrapperFunc(mwHandlerFunc(fn).Middleware())
 }
 
-type Wrapper interface {
-	Wrap(http.Handler) http.Handler
+// UseHandler adds the given handler as middleware to the stack.
+// the handler will be called before the next middleware
+func (s *Stack) UseHandler(mw http.Handler) *Stack {
+	return s.UseWrapper(before(mw.ServeHTTP))
 }
 
-type Swapper interface {
-	// Swap must be defined on a pointer
-	// and changes the the value of the pointer
-	// to the value the replacement is pointing to
-	Swap(replacement interface{})
+// UseHandlerFunc is like UseHandler but for http.HandlerFunc
+func (s *Stack) UseHandlerFunc(fn func(wr http.ResponseWriter, req *http.Request)) *Stack {
+	return s.UseWrapper(before(fn))
 }
 
-/*
-	Accepted middlewares
-
-	Functions:
-
-	func(wr http.ResponseWriter, req *http.Request)
-	func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	func(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-	func(http.Handler) http.Handler
-
-	Interfaces:
-
-	http.Handler: ServeHTTP(wr http.ResponseWriter, req *http.Request)
-	ContextHandler: ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	Middleware: ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	ContextMiddleware: ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-	Wrapper: Wrap(http.Handler) http.Handler
-*/
-
-type Stack struct {
-	h          http.Handler
-	Middleware []string
-	File       string
-	Line       int
+// UseHandlerWithContext adds the given context handler as middleware to the stack.
+// the handler will be called before the next middleware
+func (s *Stack) UseHandlerWithContext(mw ContextHandler) *Stack {
+	return s.UseWrapper(before(ContextHandlerFunc(mw.ServeHTTP).ServeHTTP))
 }
 
-func (s *Stack) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	s.h.ServeHTTP(w, req)
+// UseHandlerFuncWithContext adds the given function as middleware to the stack.
+// the handler will be called before the next middleware
+func (s *Stack) UseHandlerFuncWithContext(fn func(c Contexter, w http.ResponseWriter, r *http.Request)) *Stack {
+	return s.UseWrapper(before(ContextHandlerFunc(fn).ServeHTTP))
 }
 
-func (s *Stack) ContextHandler() *contextHandler {
-	return &contextHandler{s.h}
+// UseWithContext adds the context middleware to the middleware stack
+func (s *Stack) UseWithContext(mw ContextMiddleware) *Stack {
+	return s.UseWrapperFunc(mwCtxHandlerFunc(mw.ServeHTTP).Middleware())
 }
 
-func (s *Stack) String() string {
-	var mw []string
-
-	for i, m := range s.Middleware {
-		mw = append(mw, fmt.Sprintf("  %p[%d] %s", s, i, m))
-	}
-
-	return fmt.Sprintf("<Stack\n  %p %s:%d \n%s\n>", s, s.File, s.Line, strings.Join(mw, "\n"))
+// UseFuncWithContext adds the given function to the middleware stack
+func (s *Stack) UseFuncWithContext(fn func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)) *Stack {
+	return s.UseWrapperFunc(mwCtxHandlerFunc(fn).Middleware())
 }
 
-/*
-func NewWithContext(middlewares ...interface{}) *Stack {
-	mw := append([]interface{}{Context}, middlewares...)
-	s := New(mw...)
-	_, file, line, _ := runtime.Caller(1)
+// UseWrapper adds the given wrapper to the middleware stack
+func (s *Stack) UseWrapper(mw Wrapper) *Stack {
+	return s.UseWrapperFunc(mw.Wrap)
+}
 
-	s.Line = line
-	s.File = filepath.FromSlash(file)
+// UseWrapperFunc adds the given function to the middleware stack
+func (s *Stack) UseWrapperFunc(mw func(http.Handler) http.Handler) *Stack {
+	*s = append(*s, mw)
 	return s
 }
-*/
 
-type mwHandlerFunc func(wr http.ResponseWriter, req *http.Request, next http.Handler)
+// Concat returns a new stack that has the middleware of the current stack concatenated with the middleware of the given stack
+func (s *Stack) Concat(st *Stack) *Stack {
+	// *s = append(*s, st...)
+	s3 := append(*s, (*st)...)
+	return &s3
+}
 
-func (m mwHandlerFunc) Middleware() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) { m(wr, req, next) })
+// Wrap wraps the stack around the next handler and returns the resulting handler
+func (s *Stack) Wrap(next http.Handler) http.Handler {
+	return s.wrap(next)
+}
+
+func (s *Stack) wrap(next http.Handler) http.Handler {
+	if next == nil {
+		next = http.HandlerFunc(func(http.ResponseWriter, *http.Request) {})
 	}
-}
-
-func mwHandler(h interface {
-	ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-}) func(http.Handler) http.Handler {
-	return mwHandlerFunc(h.ServeHTTP).Middleware()
-}
-
-type ctxHandler interface {
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-}
-
-type ctxHandlerFunc func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-
-func (c ctxHandlerFunc) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
-	ctx, ok := wr.(Contexter)
-	if !ok {
-		panic("wrack.Context not in stack")
+	for i := len(*s) - 1; i >= 0; i-- {
+		next = (*s)[i](next)
 	}
-	c(ctx, wr, req)
+	return next
 }
 
-type mwCtxHandlerFunc func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-
-func (m mwCtxHandlerFunc) Middleware() func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(wr http.ResponseWriter, req *http.Request) {
-			ctx := wr.(Contexter)
-			m(ctx, wr, req, next)
-		})
-	}
+func (s *Stack) Handler() http.Handler {
+	return s.wrap(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {}))
 }
 
-func mwCtxHandler(h interface {
-	ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-}) func(http.Handler) http.Handler {
-	return mwCtxHandlerFunc(h.ServeHTTP).Middleware()
+func (s *Stack) HandlerWithContext() http.Handler {
+	return &contextHandler{s.wrap(nil)}
 }
 
-/*
-	Converts to an http.Handler
-
-	The following functions are converted:
-
-	    func(http.Handler) http.Handler
-	    func(wr http.ResponseWriter, req *http.Request)
-	    func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	    func(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	    func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-
-	The following interfaces are converted:
-
-	    Wrap(http.Handler) http.Handler
-	    ServeHTTP(wr http.ResponseWriter, req *http.Request)
-	    ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request)
-	    ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	    ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-*/
-func Handler(i interface{}) (h http.Handler) {
-	switch x := i.(type) {
-	case http.Handler:
-		h = x
-	case http.HandlerFunc:
-		h = x
-	case func(wr http.ResponseWriter, req *http.Request):
-		h = http.HandlerFunc(x)
-	case ctxHandlerFunc:
-		h = x
-	case func(ctx Contexter, wr http.ResponseWriter, req *http.Request):
-		h = ctxHandlerFunc(x)
-	case ctxHandler:
-		h = ctxHandlerFunc(x.ServeHTTP)
-	case func(wr http.ResponseWriter, req *http.Request, next http.Handler):
-		h = mwHandlerFunc(x).Middleware()(noOp)
-	case func(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler):
-		h = mwCtxHandlerFunc(x).Middleware()(noOp)
-	case interface {
-		ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler)
-	}:
-		h = mwHandlerFunc(x.ServeHTTP).Middleware()(noOp)
-	case interface {
-		ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler)
-	}:
-		h = mwCtxHandlerFunc(x.ServeHTTP).Middleware()(noOp)
-	case func(http.Handler) http.Handler:
-		h = x(noOp)
-	default:
-		panic(fmt.Sprintf("can't convert %T to handler", x))
-	}
-
-	return
+func (s *Stack) WrapFunc(fn func(wr http.ResponseWriter, req *http.Request)) http.Handler {
+	return s.Wrap(http.HandlerFunc(fn))
 }
 
-func HandlerFunc(i interface{}) (h http.HandlerFunc) {
-	return Handler(i).ServeHTTP
+// WrapWithContext wraps the stack around the given app and returns a handler to run the stack
+// that adds context to the http.ResponseWriter.
+// It should be used instead of Wrap for the outermost stack and only there
+func (s *Stack) WrapWithContext(app ContextHandler) http.Handler {
+	return &contextHandler{s.Wrap(ContextHandlerFunc(app.ServeHTTP))}
 }
 
-type end http.HandlerFunc
-
-func (e end) ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler) {
-	http.HandlerFunc(e).ServeHTTP(wr, req)
-}
-
-func (e end) middleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(e)
-}
-
-func Handlers(i ...interface{}) (h []http.Handler) {
-	h = make([]http.Handler, len(i))
-
-	for n, ii := range i {
-		h[n] = Handler(ii)
-	}
-
-	return h
+func (s *Stack) WrapFuncWithContext(fn func(ctx Contexter, wr http.ResponseWriter, req *http.Request)) http.Handler {
+	return &contextHandler{s.Wrap(ContextHandlerFunc(fn))}
 }

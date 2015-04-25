@@ -3,29 +3,23 @@
 package stack
 
 import (
-	"fmt"
-	"go/build"
 	"net/http"
-	"path/filepath"
 	"testing"
 )
 
-func init() {
-	fmt.Println(build.Default.BuildTags)
-}
-
 func TestStack(t *testing.T) {
+
 	tests := map[string]http.Handler{
-		"abc": New(
-			write("a"),
-			write("b").ServeHTTPNext,
-			write("c").ServeHTTP,
-		),
-		"ab": New(
-			write("a").Wrap,
-			writeStop("b"),
-			write("c"),
-		),
+		"abc": New().
+			UseHandler(write("a")).
+			UseFunc(write("b").ServeHTTPNext).
+			UseHandlerFunc(write("c").ServeHTTP).
+			Handler(),
+		"ab": New().
+			UseWrapperFunc(write("a").Wrap).
+			UseWrapper(writeStop("b")).
+			UseHandler(write("c")).
+			Handler(),
 	}
 
 	for body, h := range tests {
@@ -34,5 +28,3 @@ func TestStack(t *testing.T) {
 		assertResponse(t, rec, body, 200)
 	}
 }
-
-var gopath = filepath.SplitList(build.Default.GOPATH)[0]
