@@ -38,7 +38,7 @@ func ExampleBasic() {
 	// check that the context fulfills all requirements
 
 	stackBasic := stack.New().
-		UseWrapper(stackhttpauth.Basic("example.com", secretBasic)).
+		UseWithContext(stackhttpauth.NewBasic("example.com", secretBasic)).
 		WrapFuncWithContext(app)
 
 	rec := httptest.NewRecorder()
@@ -67,7 +67,7 @@ func ExampleBasic() {
 func ExampleDigest() {
 
 	stackDigest := stack.New().
-		UseWrapper(stackhttpauth.Digest("example.com", secretDigest)).
+		UseWithContext(stackhttpauth.NewDigest("example.com", secretDigest)).
 		WrapFuncWithContext(app)
 
 	rec := httptest.NewRecorder()

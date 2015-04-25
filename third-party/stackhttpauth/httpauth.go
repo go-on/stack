@@ -23,45 +23,41 @@ func (a *AuthenticatedRequest) Swap(repl interface{}) {
 }
 
 type digest struct {
-	secrets func(user, realm string) string
-	realm   string
+	auth *auth.DigestAuth
 }
 
-func (d *digest) Wrap(next http.Handler) http.Handler {
-	authenticator := auth.NewDigestAuthenticator(d.realm, d.secrets)
+func (d *digest) ServeHTTP(ctx stack.Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler) {
 	fn := func(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		authR := AuthenticatedRequest{*r}
-		w.(stack.Contexter).Set(&authR)
-		next.ServeHTTP(w, &r.Request)
+		ctx.Set(&authR)
+		next.ServeHTTP(w, req)
 	}
-	return authenticator.Wrap(fn)
+	d.auth.Wrap(fn).ServeHTTP(wr, req)
 }
 
-// Digest returns a wrapper that authenticates via auth.NewDigestAuthenticator
+// NewDigest returns a middleware that authenticates via auth.NewDigestAuthenticator
 // and saves the resulting *auth.AuthenticatedRequest in the Contexter (response writer).
-func Digest(realm string, secrets func(user, realm string) string) *digest {
-	return &digest{secrets, realm}
+func NewDigest(realm string, secrets func(user, realm string) string) *digest {
+	return &digest{auth.NewDigestAuthenticator(realm, secrets)}
 }
 
 type basic struct {
-	secrets func(user, realm string) string
-	realm   string
+	auth *auth.BasicAuth
 }
 
-func (d *basic) Wrap(next http.Handler) http.Handler {
-	authenticator := auth.NewBasicAuthenticator(d.realm, d.secrets)
+func (d *basic) ServeHTTP(ctx stack.Contexter, wr http.ResponseWriter, req *http.Request, next http.Handler) {
 	fn := func(w http.ResponseWriter, r *auth.AuthenticatedRequest) {
 		authR := AuthenticatedRequest{*r}
-		w.(stack.Contexter).Set(&authR)
-		next.ServeHTTP(w, &r.Request)
+		ctx.Set(&authR)
+		next.ServeHTTP(w, req)
 	}
-	return authenticator.Wrap(fn)
+	d.auth.Wrap(fn).ServeHTTP(wr, req)
 }
 
-// Basic returns a wrapper that authenticates via auth.NewBasicAuthenticator
+// NewBasic returns a middleware that authenticates via auth.NewBasicAuthenticator
 // and saves the resulting *auth.AuthenticatedRequest in the Contexter (response writer).
-func Basic(realm string, secrets func(user, realm string) string) *basic {
-	return &basic{secrets, realm}
+func NewBasic(realm string, secrets func(user, realm string) string) *basic {
+	return &basic{auth.NewBasicAuthenticator(realm, secrets)}
 }
 
 func DigestSecret(user, password, realm string) string {
