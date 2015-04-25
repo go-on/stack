@@ -198,17 +198,6 @@ func main() {
 
 ```
 
-## FAQ
-
-### Q
-
-A ResponseWriter is an interface, because it may implement other interfaces from the http libary,
-e.g. http.Flusher. If it is wrapped that underlying implementation is not accessible anymore
-
-### A
-
-Since only one Contexter may be used within a stack, it is always possible to ask the Contexter for the underlying ResponseWriter. This is what helper functions like ReclaimResponseWriter(), Flush(), CloseNotify() and Hijack() do.
-
 ## Credits
 
 Initial inspiration came from Christian Neukirchen's
