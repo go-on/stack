@@ -2,30 +2,29 @@ package server
 
 import (
 	"github.com/go-on/stack"
+	"github.com/go-on/stack/mux"
 	"github.com/go-on/stack/mw"
-	"github.com/go-on/stack/router"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	stack *stack.Stack
-	*router.Router
+	*stack.Stack
+	*mux.Mux
 }
 
 func New() *Server {
-	return Custom(DefaultStack)
-}
-
-func Custom(st *stack.Stack) *Server {
 	return &Server{
-		Router: router.New(),
-		stack:  st,
+		Stack: DefaultStack(),
+		Mux:   mux.New(),
 	}
 }
 
-func (s *Server) ListenAndServe(addr string) error {
-	return http.ListenAndServe(addr, s.stack.WrapWithContext(nil))
+func (s *Server) HTTPServer(addr string) *http.Server {
+	return &http.Server{
+		Addr:    addr,
+		Handler: s.Stack.WrapWithContext(stack.HandlerToContextHandler(s.Mux)),
+	}
 }
 
 func errCatcher(err interface{}, w http.ResponseWriter, r *http.Request) {
@@ -33,8 +32,10 @@ func errCatcher(err interface{}, w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusInternalServerError)
 }
 
-var DefaultStack = stack.New().
-	Use(mw.Catch(errCatcher)).
-	Use(mw.Prepare()).
-	Use(mw.MethodOverride()).
-	Use(mw.MethodOverrideByField("_method"))
+func DefaultStack() *stack.Stack {
+	return stack.New().
+		Use(mw.Catch(errCatcher)).
+		Use(mw.Prepare()).
+		Use(mw.MethodOverride()).
+		Use(mw.MethodOverrideByField("_method"))
+}
