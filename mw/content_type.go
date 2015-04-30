@@ -47,4 +47,5 @@ var (
 	JavaScriptContentType = ContentType("application/javascript; charset=utf-8")
 	RSSFeedContentType    = ContentType("application/rss+xml; charset=utf-8")
 	AtomFeedContentType   = ContentType("application/atom+xml; charset=utf-8")
+	PDFContentType        = ContentType("application/pdf")
 )
