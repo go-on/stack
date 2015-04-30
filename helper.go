@@ -16,6 +16,18 @@ func mwHandler(h Middleware) func(http.Handler) http.Handler {
 	return mwHandlerFunc(h.ServeHTTP).Middleware()
 }
 
+func HandlerToContextHandler(h http.Handler) ContextHandler {
+	return ctxHandlerFunc(func(ctx Contexter, wr http.ResponseWriter, req *http.Request) {
+		h.ServeHTTP(wr, req)
+	})
+}
+
+type ctxHandlerFunc func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
+
+func (c ctxHandlerFunc) ServeHTTP(ctx Contexter, wr http.ResponseWriter, req *http.Request) {
+	c(ctx, wr, req)
+}
+
 type ContextHandlerFunc func(ctx Contexter, wr http.ResponseWriter, req *http.Request)
 
 func (c ContextHandlerFunc) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
