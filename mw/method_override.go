@@ -69,9 +69,7 @@ func (m MethodOverrideByField) serveHTTP(w http.ResponseWriter, r *http.Request)
 	if r.Method != method.POST.String() {
 		return false
 	}
-	override := r.PostFormValue(string(m))
-
-	// fmt.Printf("override: %#v\n", r.PostForm)
+	override := r.FormValue(string(m))
 
 	if override != "" {
 		expectedMethod, accepted := acceptedOverrides[override]
