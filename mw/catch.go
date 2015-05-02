@@ -53,5 +53,8 @@ type panicCodes []int
 
 // ServeHTTP wraps the current Responsewriter with a responsewriter.PanicCodes
 func (p panicCodes) ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler) {
-	next.ServeHTTP(responsewriter.NewPanicCodes(wr, []int(p)...), req)
+	pn := responsewriter.NewPanicCodes(wr, []int(p)...)
+	next.ServeHTTP(pn, req)
+	// if we got this far, we had no panic :-)
+	pn.FlushAll()
 }
