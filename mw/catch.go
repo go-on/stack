@@ -41,3 +41,17 @@ func (c *catch) String() string {
 func Catch(fn func(recovered interface{}, w http.ResponseWriter, r *http.Request)) *catch {
 	return &catch{fn, Caller()}
 }
+
+// PanicCodes returns a middleware that panics if any of the given http codes is set.
+// This allows to get stack traces for debugging. Don't use this in production.
+func PanicCodes(codes ...int) panicCodes {
+	return panicCodes(codes)
+}
+
+// panicCodes is a debugging tool to get a stack trace, if some http.StatusCode is set that is inside the list
+type panicCodes []int
+
+// ServeHTTP wraps the current Responsewriter with a responsewriter.PanicCodes
+func (p panicCodes) ServeHTTP(wr http.ResponseWriter, req *http.Request, next http.Handler) {
+	next.ServeHTTP(responsewriter.NewPanicCodes(wr, []int(p)...), req)
+}
