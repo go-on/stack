@@ -20,7 +20,7 @@ func TestMux(t *testing.T) {
 		{"/b/", "/b", http.StatusNotFound},
 		{"/c/", "/c/x", http.StatusOK},
 		{"/d/e/", "/d/e", http.StatusNotFound},
-		{"/d/g/", "/f/g/", http.StatusOK},
+		{"/d/g/", "/d/g/", http.StatusOK},
 	}
 
 	for _, test := range tests {

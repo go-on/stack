@@ -21,6 +21,9 @@ func (p *Mux) HandleFunc(path string, fn func(http.ResponseWriter, *http.Request
 }
 
 func (p *Mux) Handle(path string, rh http.Handler) {
+	if path[0] != '/' || path[len(path)-1] != '/' {
+		panic("path must start and end with /")
+	}
 	nd := p
 	var start int = 1
 	var end int
@@ -43,11 +46,11 @@ func (p *Mux) Handle(path string, rh http.Handler) {
 			end += start
 		}
 
-		p := path[start:end]
-		subMux := nd.edges[p]
+		pa := path[start:end]
+		subMux := nd.edges[pa]
 		if subMux == nil {
 			subMux = &Mux{edges: make(map[string]*Mux)}
-			nd.edges[p] = subMux
+			nd.edges[pa] = subMux
 		}
 		nd = subMux
 
@@ -61,16 +64,25 @@ func (p *Mux) Handle(path string, rh http.Handler) {
 }
 
 func (n *Mux) findHandler(start int, endPath int, req *http.Request) http.Handler {
-	if start > endPath {
+
+	if start >= endPath {
 		return n.handler
 	}
+
 	pos := strings.Index(req.URL.Path[start:endPath], "/")
 	end := start + pos
 	if pos == -1 {
-		end = endPath
+		if len(n.edges) > 0 {
+			hd, has := n.edges[req.URL.Path[start:endPath]]
+			if has {
+				return hd
+			}
+		}
+		return nil
 	}
 
 	pth := req.URL.Path[start:end]
+
 	for k, val := range n.edges {
 		if k == pth {
 			if len(val.edges) == 0 {
@@ -83,7 +95,7 @@ func (n *Mux) findHandler(start int, endPath int, req *http.Request) http.Handle
 }
 
 func (n *Mux) Handler(req *http.Request) http.Handler {
-	return n.findHandler(1, len(req.URL.Path)-1, req)
+	return n.findHandler(1, len(req.URL.Path), req)
 }
 
 func (n *Mux) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
