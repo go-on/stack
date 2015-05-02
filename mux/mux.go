@@ -21,9 +21,11 @@ func (p *Mux) HandleFunc(path string, fn func(http.ResponseWriter, *http.Request
 }
 
 func (p *Mux) Handle(path string, rh http.Handler) {
-	if path[0] != '/' || path[len(path)-1] != '/' {
-		panic("path must start and end with /")
-	}
+	/*
+		if path[0] != '/' || path[len(path)-1] != '/' {
+			panic("path must start and end with /")
+		}
+	*/
 	nd := p
 	var start int = 1
 	var end int
@@ -40,13 +42,14 @@ func (p *Mux) Handle(path string, rh http.Handler) {
 		}
 
 		if end == -1 {
-			end = len(path)
+			end = len(path) - 1
 			fin = true
 		} else {
 			end += start
 		}
 
-		pa := path[start:end]
+		pa := path[start : end+1]
+		// println("registering", pa)
 		subMux := nd.edges[pa]
 		if subMux == nil {
 			subMux = &Mux{edges: make(map[string]*Mux)}
@@ -63,39 +66,50 @@ func (p *Mux) Handle(path string, rh http.Handler) {
 	nd.handler = rh
 }
 
-func (n *Mux) findHandler(start int, endPath int, req *http.Request) http.Handler {
-
-	if start >= endPath {
-		return n.handler
-	}
-
-	pos := strings.Index(req.URL.Path[start:endPath], "/")
-	end := start + pos
-	if pos == -1 {
-		if len(n.edges) > 0 {
-			hd, has := n.edges[req.URL.Path[start:endPath]]
-			if has {
-				return hd
-			}
-		}
-		return nil
-	}
-
-	pth := req.URL.Path[start:end]
-
-	for k, val := range n.edges {
-		if k == pth {
-			if len(val.edges) == 0 {
-				return val.handler
-			}
-			return val.findHandler(end+1, endPath, req)
+func (m *Mux) findEdge(path string) *Mux {
+	// println("findEdge", path)
+	if len(m.edges) > 0 {
+		hd, has := m.edges[path]
+		if has {
+			// println("found")
+			return hd
 		}
 	}
+	// println("not found")
 	return nil
 }
 
+func (m *Mux) findHandler(start int, req *http.Request) http.Handler {
+	endPath := len(req.URL.Path)
+	if start >= endPath {
+		return m.handler
+	}
+
+	edge := m.findEdge(req.URL.Path[start:])
+
+	if edge != nil {
+		return edge.handler
+	}
+
+	pos := strings.Index(req.URL.Path[start:], "/")
+	end := start + pos
+	if pos == -1 {
+		return m.handler
+	}
+
+	pth := req.URL.Path[start : end+1]
+
+	edge = m.findEdge(pth)
+
+	if edge != nil {
+		return edge.findHandler(end+1, req)
+	}
+
+	return m.handler
+}
+
 func (n *Mux) Handler(req *http.Request) http.Handler {
-	return n.findHandler(1, len(req.URL.Path), req)
+	return n.findHandler(1, req)
 }
 
 func (n *Mux) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
