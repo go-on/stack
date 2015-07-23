@@ -26,7 +26,7 @@ type Session struct {
 	sessions.Session
 }
 
-func (s *Session) Swap(repl interface{}) {
+func (s *Session) Recover(repl interface{}) {
 	*s = *(repl.(*Session))
 }
 

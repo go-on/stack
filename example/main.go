@@ -11,7 +11,7 @@ import (
 
 type ctxA string
 
-func (c *ctxA) Swap(v interface{}) {
+func (c *ctxA) Recover(v interface{}) {
 	*c = *(v.(*ctxA))
 }
 

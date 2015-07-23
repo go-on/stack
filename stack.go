@@ -74,6 +74,11 @@ func (s *Stack) Concat(st *Stack) *Stack {
 	return &s3
 }
 
+// ConcatWithHandler returns a new stack that has the middleware concatenated with a handler
+func (s *Stack) ConcatWithHandler(h http.Handler) *Stack {
+	return s.Concat(New().UseHandler(h))
+}
+
 // Wrap wraps the stack around the next handler and returns the resulting handler
 func (s *Stack) Wrap(next http.Handler) http.Handler {
 	return s.wrap(next)

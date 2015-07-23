@@ -18,7 +18,7 @@ type AuthenticatedRequest struct {
 	auth.AuthenticatedRequest
 }
 
-func (a *AuthenticatedRequest) Swap(repl interface{}) {
+func (a *AuthenticatedRequest) Recover(repl interface{}) {
 	*a = *(repl.(*AuthenticatedRequest))
 }
 

@@ -105,15 +105,15 @@ A simple router is included in the sub package router.
 
 Context is shared by wrapping the http.ResponseWriter with another one that also implements the Contexter interface. This new ResponseWriter is then passed to the middleware. In order to use the context the middleware must have
 the Contexter as first parameter. 
-Context data can be any type that has a pointer method implementing the Swapper interface. Each type can only be saved once per request.
+Context data can be any type that has a pointer method implementing the Recoverer interface. Each type can only be saved once per request.
 
 ```go
   // define context data type, may be any type
   type Name string
 
-  // implement Swapper interface
-  // Swap replaces the value of m with the value of val
-  func (n *Name) Swap(val interface{}) {
+  // implement Recoverer interface
+  // Recover replaces the value of m with the value of val
+  func (n *Name) Recover(val interface{}) {
     *n = *(val.(*Name)) // will never panic
   }
 

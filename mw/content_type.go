@@ -11,7 +11,7 @@ import (
 type ContentType string
 
 // SetContentType sets the content type in the given ResponseWriter
-func (c ContentType) SetContentType(w http.ResponseWriter) {
+func (c ContentType) Set(w http.ResponseWriter) {
 	w.Header().Set("Content-Type", string(c))
 }
 
@@ -23,7 +23,7 @@ func (c ContentType) ServeHTTP(wr http.ResponseWriter, req *http.Request, next h
 	var bodyWritten = false
 	checked := responsewriter.NewPeek(wr, func(ck *responsewriter.Peek) bool {
 		if ck.IsOk() {
-			c.SetContentType(ck)
+			c.Set(ck)
 		}
 		ck.FlushHeaders()
 		ck.FlushCode()
@@ -34,7 +34,7 @@ func (c ContentType) ServeHTTP(wr http.ResponseWriter, req *http.Request, next h
 	next.ServeHTTP(checked, req)
 
 	if !bodyWritten {
-		c.SetContentType(checked)
+		c.Set(checked)
 	}
 	checked.FlushMissing()
 }
@@ -48,4 +48,5 @@ var (
 	RSSFeedContentType    = ContentType("application/rss+xml; charset=utf-8")
 	AtomFeedContentType   = ContentType("application/atom+xml; charset=utf-8")
 	PDFContentType        = ContentType("application/pdf")
+	CSVContentType        = ContentType("text/csv; charset=utf-8")
 )

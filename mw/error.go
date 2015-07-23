@@ -12,8 +12,8 @@ type Error struct {
 	Err error
 }
 
-// Swap implements the stack.Swapper interface.
-func (e *Error) Swap(repl interface{}) {
+// Recover implements the stack.Recoverer interface.
+func (e *Error) Recover(repl interface{}) {
 	*e = *(repl.(*Error))
 }
 

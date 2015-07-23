@@ -52,7 +52,7 @@ type REST [7]http.Handler
 func (r REST) Get(h http.Handler) REST { r[get] = h; return r }
 
 // Head registers a handler for the HEAD method and an url path that has a parameter (does not end with a slash)
-func (r REST) Head(h http.Handler) REST { r[get] = h; return r }
+func (r REST) Head(h http.Handler) REST { r[head] = h; return r }
 
 // Index registers a handler for the GET method and an url path that ends with a slash (no parameter)
 func (r REST) Index(h http.Handler) REST { r[index] = h; return r }

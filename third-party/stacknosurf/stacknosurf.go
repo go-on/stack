@@ -16,7 +16,7 @@ import (
 // represents a csrf token from the github.com/justinas/nosurf package.
 type Token string
 
-func (t *Token) Swap(repl interface{}) {
+func (t *Token) Recover(repl interface{}) {
 	*t = *(repl.(*Token))
 }
 

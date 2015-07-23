@@ -1,6 +1,7 @@
 package mux
 
 import (
+	"fmt"
 	"github.com/go-on/stack"
 	"net/http"
 	"strings"
@@ -14,6 +15,7 @@ func New() *Mux {
 type Mux struct {
 	edges   map[string]*Mux // the empty key is for the next wildcard Mux (the Mux after my wildcard)
 	handler http.Handler
+	Debug   bool
 }
 
 func (p *Mux) HandleFunc(path string, fn func(http.ResponseWriter, *http.Request)) {
@@ -21,6 +23,9 @@ func (p *Mux) HandleFunc(path string, fn func(http.ResponseWriter, *http.Request
 }
 
 func (p *Mux) Handle(path string, rh http.Handler) {
+	if p.Debug {
+		fmt.Printf("registering handler %T for path %#v\n", rh, path)
+	}
 	/*
 		if path[0] != '/' || path[len(path)-1] != '/' {
 			panic("path must start and end with /")
@@ -201,6 +206,10 @@ func (wm *WrappedMux) Handle(path string, h http.Handler) {
 
 func (wm *WrappedMux) HandleFunc(path string, fn func(http.ResponseWriter, *http.Request)) {
 	wm.Handle(path, http.HandlerFunc(fn))
+}
+
+func (wm *WrappedMux) Debug() {
+	wm.mx.Debug = true
 }
 
 func (wm *WrappedMux) ServeHTTP(wr http.ResponseWriter, req *http.Request) {

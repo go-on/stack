@@ -11,7 +11,7 @@ import (
 
 type ctx string
 
-func (c *ctx) Swap(i interface{}) {
+func (c *ctx) Recover(i interface{}) {
 	*c = *(i.(*ctx))
 }
 
