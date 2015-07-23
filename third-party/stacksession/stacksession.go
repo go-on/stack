@@ -11,9 +11,9 @@ package stacksession
 import (
 	"net/http"
 
-	"github.com/go-on/stack/mw"
+	"gopkg.in/go-on/stack.v1/mw"
 
-	"github.com/go-on/stack"
+	"gopkg.in/go-on/stack.v1"
 	"gopkg.in/go-on/sessions.v1"
 )
 

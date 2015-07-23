@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"github.com/go-on/stack"
+	"gopkg.in/go-on/stack.v1"
 )
 
 var (

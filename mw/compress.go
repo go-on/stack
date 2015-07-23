@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-on/stack/responsewriter"
+	"gopkg.in/go-on/stack.v1/responsewriter"
 )
 
 // GZip compresses the body written by the next handlers

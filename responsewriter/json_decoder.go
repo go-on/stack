@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/go-on/stack"
+	"gopkg.in/go-on/stack.v1"
 )
 
 // JSONDecoder is a ResponseWriter wrapper that decodes everything writen to it to a json object.

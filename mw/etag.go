@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/go-on/stack/responsewriter"
+	"gopkg.in/go-on/stack.v1/responsewriter"
 	"gopkg.in/go-on/method.v1"
 )
 
