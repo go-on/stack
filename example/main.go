@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/go-on/stack"
-	"github.com/go-on/stack/mw"
+	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v3/mw"
 )
 
 type ctxA string

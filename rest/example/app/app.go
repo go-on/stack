@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"github.com/go-on/stack/mux"
-	"github.com/go-on/stack/mw"
-	"github.com/go-on/stack/rest"
+	"gopkg.in/go-on/stack.v3/mux"
+	"gopkg.in/go-on/stack.v3/mw"
+	"gopkg.in/go-on/stack.v3/rest"
 	"net/http"
 )
 

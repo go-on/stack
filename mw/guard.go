@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-on/stack/responsewriter"
+	"gopkg.in/go-on/stack.v3/responsewriter"
 )
 
 // GuardFunc is a responsewriter.Wapper and http.HandlerFunc that may operate on the ResponseWriter

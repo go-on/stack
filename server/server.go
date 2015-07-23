@@ -1,9 +1,9 @@
 package server
 
 import (
-	"github.com/go-on/stack"
-	"github.com/go-on/stack/mux"
-	"github.com/go-on/stack/mw"
+	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v3/mux"
+	"gopkg.in/go-on/stack.v3/mw"
 	"log"
 	"net/http"
 )

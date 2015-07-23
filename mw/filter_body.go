@@ -3,7 +3,7 @@ package mw
 import (
 	"fmt"
 
-	"github.com/go-on/stack/responsewriter"
+	"gopkg.in/go-on/stack.v3/responsewriter"
 	"gopkg.in/go-on/method.v1"
 
 	"net/http"

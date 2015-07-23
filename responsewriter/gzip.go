@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/go-on/stack"
+	"gopkg.in/go-on/stack.v3"
 )
 
 type GZip struct {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-on/stack/responsewriter"
+	"gopkg.in/go-on/stack.v3/responsewriter"
 )
 
 type fallback struct {
