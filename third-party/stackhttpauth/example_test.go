@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"strings"
 
-	"github.com/go-on/stack"
-	"github.com/go-on/stack/third-party/stackhttpauth"
 	"gopkg.in/go-on/go-http-auth.v1"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/third-party/stackhttpauth"
 )
 
 func secretBasic(user, realm string) string {

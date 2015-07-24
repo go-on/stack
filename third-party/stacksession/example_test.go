@@ -6,9 +6,9 @@ import (
 	"net/http/httptest"
 	"sync/atomic"
 
-	"github.com/go-on/stack"
-	"github.com/go-on/stack/third-party/stacksession"
 	"gopkg.in/go-on/sessions.v1"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/third-party/stacksession"
 )
 
 func printFlashes(ctx stack.Contexter, w http.ResponseWriter, r *http.Request, next http.Handler) {

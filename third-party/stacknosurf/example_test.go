@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/go-on/stack"
-	"github.com/go-on/stack/third-party/stacknosurf"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/third-party/stacknosurf"
 )
 
 // app serves the form value "a" for POST requests and otherwise the token
