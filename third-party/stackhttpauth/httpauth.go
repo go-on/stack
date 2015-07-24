@@ -11,7 +11,7 @@ import (
 	"net/http"
 
 	"gopkg.in/go-on/go-http-auth.v1"
-	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v6"
 )
 
 type AuthenticatedRequest struct {

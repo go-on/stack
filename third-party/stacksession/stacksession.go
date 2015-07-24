@@ -11,10 +11,10 @@ package stacksession
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v4/mw"
+	"gopkg.in/go-on/stack.v6/mw"
 
 	"gopkg.in/go-on/sessions.v1"
-	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v6"
 )
 
 type store struct {

@@ -2,8 +2,8 @@ package debugmw
 
 import (
 	"fmt"
-	"gopkg.in/go-on/stack.v4"
-	"gopkg.in/go-on/stack.v4/mw"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/mw"
 	"gopkg.in/metakeule/backtrace.v1"
 	"net/http"
 )

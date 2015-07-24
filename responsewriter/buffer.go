@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"net/http"
 
-	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v6"
 )
 
 // Buffer is a ResponseWriter wrapper that may be used as buffer.

@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v6"
 )
 
 type Deflate struct {

@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/go-on/stack.v4"
-	"gopkg.in/go-on/stack.v4/mux"
-	"gopkg.in/go-on/stack.v4/mw"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/mux"
+	"gopkg.in/go-on/stack.v6/mw"
 	"math/rand"
 	"net/http"
 	"time"
-	// "gopkg.in/go-on/stack.v4/rest"
-	"gopkg.in/go-on/stack.v4/rest/example/app"
-	"gopkg.in/go-on/stack.v4/server"
+	// "gopkg.in/go-on/stack.v6/rest"
+	"gopkg.in/go-on/stack.v6/rest/example/app"
+	"gopkg.in/go-on/stack.v6/server"
 )
 
 var layoutMW = stack.New().Use(

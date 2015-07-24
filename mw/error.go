@@ -3,8 +3,8 @@ package mw
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v4"
-	"gopkg.in/go-on/stack.v4/responsewriter"
+	"gopkg.in/go-on/stack.v6"
+	"gopkg.in/go-on/stack.v6/responsewriter"
 )
 
 // Error a type based on error that should be saved by a stack.Contexter (response writer)

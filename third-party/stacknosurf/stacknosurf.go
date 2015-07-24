@@ -7,7 +7,7 @@ package stacknosurf
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v6"
 
 	"gopkg.in/go-on/nosurf.v1"
 )
