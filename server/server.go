@@ -1,9 +1,9 @@
 package server
 
 import (
-	"gopkg.in/go-on/stack.v3"
-	"gopkg.in/go-on/stack.v3/mux"
-	"gopkg.in/go-on/stack.v3/mw"
+	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v4/mux"
+	"gopkg.in/go-on/stack.v4/mw"
 	"log"
 	"net/http"
 )

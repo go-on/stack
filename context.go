@@ -10,20 +10,20 @@ type contextTransaction struct {
 	*context
 }
 
-func (c *contextTransaction) Set(val Recoverer) {
+func (c *contextTransaction) Set(val Reclaimer) {
 	c.data[reflect.TypeOf(val)] = val
 }
 
-func (c *contextTransaction) Del(val Recoverer) {
+func (c *contextTransaction) Del(val Reclaimer) {
 	delete(c.data, reflect.TypeOf(val))
 }
 
-func (c *contextTransaction) Get(target Recoverer) bool {
+func (c *contextTransaction) Get(target Reclaimer) bool {
 	src, has := c.data[reflect.TypeOf(target)]
 	if !has {
 		return false
 	}
-	target.Recover(src)
+	target.Reclaim(src)
 	return true
 }
 
@@ -32,30 +32,30 @@ var _ Contexter = &context{}
 
 type context struct {
 	http.ResponseWriter // you always need this
-	data                map[reflect.Type]Recoverer
+	data                map[reflect.Type]Reclaimer
 	*sync.RWMutex
 }
 
-func (c *context) Set(val Recoverer) {
+func (c *context) Set(val Reclaimer) {
 	c.Lock()
 	defer c.Unlock()
 	c.data[reflect.TypeOf(val)] = val
 }
 
-func (c *context) Del(val Recoverer) {
+func (c *context) Del(val Reclaimer) {
 	c.Lock()
 	defer c.Unlock()
 	delete(c.data, reflect.TypeOf(val))
 }
 
-func (c *context) Get(target Recoverer) bool {
+func (c *context) Get(target Reclaimer) bool {
 	c.RLock()
 	defer c.RUnlock()
 	src, has := c.data[reflect.TypeOf(target)]
 	if !has {
 		return false
 	}
-	target.Recover(src)
+	target.Reclaim(src)
 	return true
 }
 
@@ -70,7 +70,7 @@ type contextHandler struct {
 }
 
 func (c *contextHandler) ServeHTTP(wr http.ResponseWriter, req *http.Request) {
-	ctx := &context{wr, map[reflect.Type]Recoverer{}, &sync.RWMutex{}}
+	ctx := &context{wr, map[reflect.Type]Reclaimer{}, &sync.RWMutex{}}
 	ctx.Set(&ResponseWriter{wr})
 	c.Handler.ServeHTTP(ctx, req)
 }

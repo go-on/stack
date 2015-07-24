@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v4"
 )
 
 // Peek is a ResponseWriter wrapper that intercepts the writing of the body, allowing to check headers and

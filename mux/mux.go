@@ -2,7 +2,7 @@ package mux
 
 import (
 	"fmt"
-	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v4"
 	"net/http"
 	"strings"
 	"sync"

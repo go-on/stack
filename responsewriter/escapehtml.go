@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v4"
 )
 
 var (

@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"gopkg.in/go-on/stack.v3"
-	"gopkg.in/go-on/stack.v3/mw"
+	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v4/mw"
 )
 
 type ctxA string
 
-func (c *ctxA) Recover(v interface{}) {
+func (c *ctxA) Reclaim(v interface{}) {
 	*c = *(v.(*ctxA))
 }
 

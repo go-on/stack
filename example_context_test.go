@@ -10,8 +10,8 @@ import (
 
 type Val string
 
-// Recover replaces the value of m with the value of val
-func (m *Val) Recover(val interface{}) {
+// Reclaim replaces the value of m with the value of val
+func (m *Val) Reclaim(val interface{}) {
 	*m = *(val.(*Val)) // will never panic
 }
 

@@ -7,7 +7,7 @@ package stacknosurf
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3"
+	"gopkg.in/go-on/stack.v4"
 
 	"gopkg.in/go-on/nosurf.v1"
 )
@@ -16,7 +16,7 @@ import (
 // represents a csrf token from the github.com/justinas/nosurf package.
 type Token string
 
-func (t *Token) Recover(repl interface{}) {
+func (t *Token) Reclaim(repl interface{}) {
 	*t = *(repl.(*Token))
 }
 

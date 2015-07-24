@@ -11,7 +11,7 @@ type ResponseWriter struct {
 	http.ResponseWriter
 }
 
-func (rw *ResponseWriter) Recover(repl interface{}) {
+func (rw *ResponseWriter) Reclaim(repl interface{}) {
 	*rw = *(repl.(*ResponseWriter))
 }
 

@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/go-on/method.v1"
 
-	// "gopkg.in/go-on/stack.v3/wrap"
+	// "gopkg.in/go-on/stack.v4/wrap"
 )
 
 type methodOverride struct{}

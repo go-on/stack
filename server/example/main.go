@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gopkg.in/go-on/stack.v3/mw"
-	"gopkg.in/go-on/stack.v3/rest"
-	"gopkg.in/go-on/stack.v3/server"
+	"gopkg.in/go-on/stack.v4/mw"
+	"gopkg.in/go-on/stack.v4/rest"
+	"gopkg.in/go-on/stack.v4/server"
 )
 
 func main() {

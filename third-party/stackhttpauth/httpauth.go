@@ -10,15 +10,15 @@ import (
 	"io"
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3"
 	"gopkg.in/go-on/go-http-auth.v1"
+	"gopkg.in/go-on/stack.v4"
 )
 
 type AuthenticatedRequest struct {
 	auth.AuthenticatedRequest
 }
 
-func (a *AuthenticatedRequest) Recover(repl interface{}) {
+func (a *AuthenticatedRequest) Reclaim(repl interface{}) {
 	*a = *(repl.(*AuthenticatedRequest))
 }
 

@@ -11,10 +11,10 @@ package stacksession
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3/mw"
+	"gopkg.in/go-on/stack.v4/mw"
 
-	"gopkg.in/go-on/stack.v3"
 	"gopkg.in/go-on/sessions.v1"
+	"gopkg.in/go-on/stack.v4"
 )
 
 type store struct {
@@ -26,7 +26,7 @@ type Session struct {
 	sessions.Session
 }
 
-func (s *Session) Recover(repl interface{}) {
+func (s *Session) Reclaim(repl interface{}) {
 	*s = *(repl.(*Session))
 }
 

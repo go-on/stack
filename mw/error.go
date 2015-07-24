@@ -3,8 +3,8 @@ package mw
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3"
-	"gopkg.in/go-on/stack.v3/responsewriter"
+	"gopkg.in/go-on/stack.v4"
+	"gopkg.in/go-on/stack.v4/responsewriter"
 )
 
 // Error a type based on error that should be saved by a stack.Contexter (response writer)
@@ -12,8 +12,8 @@ type Error struct {
 	Err error
 }
 
-// Recover implements the stack.Recoverer interface.
-func (e *Error) Recover(repl interface{}) {
+// Reclaim implements the stack.Reclaimer interface.
+func (e *Error) Reclaim(repl interface{}) {
 	*e = *(repl.(*Error))
 }
 

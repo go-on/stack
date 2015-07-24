@@ -111,9 +111,9 @@ Context data can be any type that has a pointer method implementing the Recovere
   // define context data type, may be any type
   type Name string
 
-  // implement Recoverer interface
-  // Recover replaces the value of m with the value of val
-  func (n *Name) Recover(val interface{}) {
+  // implement Reclaimer interface
+  // Reclaim replaces the value of m with the value of val
+  func (n *Name) Reclaim(val interface{}) {
     *n = *(val.(*Name)) // will never panic
   }
 

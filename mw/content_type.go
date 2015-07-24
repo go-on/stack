@@ -3,7 +3,7 @@ package mw
 import (
 	"net/http"
 
-	"gopkg.in/go-on/stack.v3/responsewriter"
+	"gopkg.in/go-on/stack.v4/responsewriter"
 )
 
 // ContentType writes the content type if the next handler was successful

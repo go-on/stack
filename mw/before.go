@@ -2,7 +2,7 @@ package mw
 
 import (
 	"fmt"
-	"gopkg.in/go-on/stack.v3/responsewriter"
+	"gopkg.in/go-on/stack.v4/responsewriter"
 	"net/http"
 )
 
